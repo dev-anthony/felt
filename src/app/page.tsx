@@ -1,9 +1,7 @@
-
-
 'use client';
 
 import Image from "next/image";
-import { ArrowBigDown, Archive, Home, Code2, User, Briefcase, Contact, Sun, Moon } from "lucide-react";
+import { Archive, Home, Sparkles, Layers, Ticket, ArrowUpRight, Sun, Moon } from "lucide-react";
 import { useState } from "react";
 
 export default function Index() {
@@ -52,15 +50,15 @@ export default function Index() {
         </div>
 
         <div className="relative z-10 text-center max-w-4xl reveal">
-          <span className="font-display text-[12px] tracking-wide uppercase text-accent block mb-8">
-            Cover Art, Listened Into Existence
-          </span>
-          <h1 className="font-display italic font-medium text-5xl md:text-[7rem] leading-[0.95] tracking-wide text-balance mb-10">
-            Your music<br />made visible
-          </h1>
-          <p className="text-muted-foreground text-[14px] md:text-[18px] leading-relaxed font-display">
-            FELT is an AI-powered cover art generation platform that allows artists and producers anywhere to upload their music or beats and instantly receive visual artwork that expresses exactly what the sound feels like .
-          </p>
+         <span className="font-display text-[10px] sm:text-xs md:text-sm tracking-[0.2em] sm:tracking-wide uppercase text-accent block mb-6 sm:mb-8">
+  Cover Art, Listened Into Existence
+</span>
+<h1 className="font-display italic font-medium text-4xl sm:text-6xl md:text-7xl lg:text-[7rem] leading-[1.05] sm:leading-[0.95] tracking-wide text-balance mb-8 sm:mb-10">
+  Your music<br className="hidden sm:inline" /> made visible
+</h1>
+<p className="max-w-xl mx-auto text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed font-display px-2 sm:px-0">
+  FELT is an AI-powered cover art generation platform that allows artists and producers anywhere to upload their music or beats and instantly receive visual artwork that expresses exactly what the sound feels like.
+</p>
         </div>
 
         {/* Mobile Navigation */}
@@ -88,7 +86,7 @@ export default function Index() {
           >
             <div className='flex flex-col gap-3'>
               <a 
-                href="#heroSection" 
+                href="#" 
                 onClick={handleLinkClick}
                 className={linkClass}
                 title="Home"
@@ -96,50 +94,38 @@ export default function Index() {
                 <Home className="w-5 h-5"/>
               </a>
               <a 
-                href="#recentworks" 
+                href="#summary" 
                 onClick={handleLinkClick}
                 className={linkClass}
-                title="Works"
+                title="Summary"
               >
-                <Code2 className="w-5 h-5"/>
+                <Sparkles className="w-5 h-5"/>
               </a>
               <a 
-                href="#about" 
+                href="#features" 
                 onClick={handleLinkClick}
                 className={linkClass}
-                title="About"
+                title="Features"
               >
-                <User className="w-5 h-5"/>
+                <Layers className="w-5 h-5"/>
               </a>
               <a 
-                href="#experience" 
+                href="#pricing" 
                 onClick={handleLinkClick}
                 className={linkClass}
-                title="Experience"
+                title="Pricing"
               >
-                <Briefcase className="w-5 h-5"/>
+                <Ticket className="w-5 h-5"/>
               </a>
               <a 
-                href="#contact" 
+                href="#cta" 
                 onClick={handleLinkClick}
                 className={linkClass}
-                title="Contact"
+                title="Get Started"
               >
-                <Contact className="w-5 h-5"/>
+                <ArrowUpRight className="w-5 h-5"/>
               </a>
               
-              {/* Dark Mode Toggle */}
-              <button
-                onClick={() => {
-                  toggleDarkMode();
-                  handleLinkClick();
-                }}
-                className={linkClass}
-                title={isDark ? "Light Mode" : "Dark Mode"}
-                aria-label="Toggle Dark Mode"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
             </div>
           </nav>
 
@@ -250,7 +236,7 @@ export default function Index() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24 px-6 border-t border-border text-center">
+      <section id="cta" className="py-24 px-6 border-t border-border text-center">
         <div className="max-w-3xl mx-auto space-y-8 reveal">
           <div className="font-display italic font-medium text-4xl md:text-6xl tracking-tighter text-balance max-w-2xl mx-auto leading-tight">
             Your music. Its feeling, made visible.
