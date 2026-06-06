@@ -319,10 +319,13 @@ export default function Index() {
       </section>
 
       {/* Captivating Aesthetic Summary Block */}
-      <section className="py-16 px-6 border-t border-border text-center bg-foreground/[0.005]">
+    {/* Captivating Aesthetic Summary Block */}
+      <section className="py-12 px-4 border-t border-border text-center bg-foreground/[0.005]">
         <div className="max-w-3xl mx-auto space-y-4 reveal">
           <p className="font-display italic text-xl md:text-2xl tracking-tight leading-relaxed max-w-2xl mx-auto">
-            We give you the definitive visual expression of your sound. No prompts, no compromises—just the raw atmosphere of your art, instantly translated into striking identity.
+            We give your music the cover art it deserves.<br />
+            One that feels the way your music feels.<br />
+            <span className="text-muted-foreground/80 font-light text-lg md:text-xl block mt-2">Discovered within the music itself.</span>
           </p>
         </div>
       </section>
