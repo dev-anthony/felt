@@ -1,9 +1,23 @@
 
 
+'use client';
+
 import Image from "next/image";
-import { ArrowBigDown } from "lucide-react";
+import { ArrowBigDown, Archive, Home, Code2, User, Briefcase, Contact, Sun, Moon } from "lucide-react";
+import { useState } from "react";
 
 export default function Index() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  const toggleNav = () => setIsOpen(!isOpen);
+  
+  const handleLinkClick = () => setIsOpen(false);
+
+  const toggleDarkMode = () => setIsDark(!isDark);
+
+  const linkClass = "text-foreground hover:text-accent transition-colors p-3 rounded-lg hover:bg-foreground/10";
+
   return (
     <main className="bg-background text-foreground  selection:bg-accent selection:text-background">
       
@@ -49,6 +63,94 @@ export default function Index() {
           </p>
         </div>
 
+        {/* Mobile Navigation */}
+        <div className="md:hidden fixed bottom-6 right-6 z-50">
+          {/* Archive Icon Button */}
+          <button
+            onClick={toggleNav}
+            className="w-14 h-14 rounded-full bg-foreground/10 dark:bg-foreground/20 border border-foreground/20 dark:border-foreground/30 flex items-center justify-center text-foreground hover:bg-foreground/20 dark:hover:bg-foreground/30 transition-all duration-300 backdrop-blur-md hover:scale-110"
+            style={{
+              transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+              transition: 'transform 300ms ease-out'
+            }}
+            aria-label="Toggle navigation"
+          >
+            <Archive className="w-6 h-6" />
+          </button>
+
+          {/* Navigation Menu */}
+          <nav 
+            className={`fixed bottom-24 right-6 z-40 bg-foreground/[0.03] dark:bg-foreground/[0.05] backdrop-blur-2xl border border-foreground/20 dark:border-foreground/30 rounded-3xl p-4 transition-all duration-300 shadow-lg ${
+              isOpen 
+                ? 'opacity-100 scale-100 pointer-events-auto' 
+                : 'opacity-0 scale-95 pointer-events-none'
+            }`}
+          >
+            <div className='flex flex-col gap-3'>
+              <a 
+                href="#heroSection" 
+                onClick={handleLinkClick}
+                className={linkClass}
+                title="Home"
+              >
+                <Home className="w-5 h-5"/>
+              </a>
+              <a 
+                href="#recentworks" 
+                onClick={handleLinkClick}
+                className={linkClass}
+                title="Works"
+              >
+                <Code2 className="w-5 h-5"/>
+              </a>
+              <a 
+                href="#about" 
+                onClick={handleLinkClick}
+                className={linkClass}
+                title="About"
+              >
+                <User className="w-5 h-5"/>
+              </a>
+              <a 
+                href="#experience" 
+                onClick={handleLinkClick}
+                className={linkClass}
+                title="Experience"
+              >
+                <Briefcase className="w-5 h-5"/>
+              </a>
+              <a 
+                href="#contact" 
+                onClick={handleLinkClick}
+                className={linkClass}
+                title="Contact"
+              >
+                <Contact className="w-5 h-5"/>
+              </a>
+              
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => {
+                  toggleDarkMode();
+                  handleLinkClick();
+                }}
+                className={linkClass}
+                title={isDark ? "Light Mode" : "Dark Mode"}
+                aria-label="Toggle Dark Mode"
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+            </div>
+          </nav>
+
+          {/* Backdrop overlay when nav is open */}
+          {isOpen && (
+            <div 
+              onClick={toggleNav}
+              className="fixed inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm z-30 transition-opacity duration-300"
+            />
+          )}
+        </div>
       </section>
 
   
