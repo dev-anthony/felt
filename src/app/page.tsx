@@ -227,27 +227,27 @@ export default function Index() {
       </section>
 
       <footer className="py-16 px-6 border-t border-border flex flex-col items-center gap-6 text-center">
-  <div className="font-display italic text-2xl tracking-tight">FELT</div>
-  <div className="flex flex-wrap justify-center gap-6 font-mono text-[8px] tracking-[0.3em] uppercase text-muted-foreground/60">
-    <span>Felt</span>
-    <span className="flex items-center gap-1.5 normal-case tracking-normal text-[8px]">
-      Built with (x² + y² - 1)³ = x²y³ in
-      <svg
-        width="14" height="10"
-        viewBox="0 0 3 2"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-label="Nigeria"
-        className="inline-block rounded-[1px] overflow-hidden flex-shrink-0"
-      >
-        <rect width="1" height="2" fill="#008751"/>
-        <rect x="1" width="1" height="2" fill="#ffffff"/>
-        <rect x="2" width="1" height="2" fill="#008751"/>
-      </svg>
-    </span>
-    <span>All wrongs reserved.</span>
-    <span>© 2026 Music Tech &amp; Arts</span>
-  </div>
-</footer>
+        <div className="font-display italic text-2xl tracking-tight">FELT</div>
+          <div className="flex flex-wrap justify-center gap-6 font-mono text-[8px] tracking-[0.3em] uppercase text-muted-foreground/60">
+            <span>Felt</span>
+              <span className="flex items-center gap-1.5 normal-case tracking-normal text-[8px]">
+              Built with (x² + y² - 1)³ = x²y³ in
+                  <svg
+                    width="14" height="10"
+                    viewBox="0 0 3 2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-label="Nigeria"
+                    className="inline-block rounded-[1px] overflow-hidden flex-shrink-0"
+                  >
+                  <rect width="1" height="2" fill="#008751"/>
+                  <rect x="1" width="1" height="2" fill="#ffffff"/>
+                  <rect x="2" width="1" height="2" fill="#008751"/>
+                </svg>
+              </span>
+            <span>All wrongs reserved.</span>
+          <span>© 2026 Music Tech &amp; Arts</span>
+      </div>
+    </footer>
 
       {/* Global Auth Trigger Instance */}
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
