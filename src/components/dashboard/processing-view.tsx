@@ -133,8 +133,8 @@ export function ProcessingView({ title, onComplete }: ProcessingViewProps) {
   }, [onComplete])
 
   return (
-    <div className="flex-1 flex items-center justify-center py-12 px-6 min-h-[450px]">
-      <div className="space-y-6 w-full max-w-sm text-center">
+    <div className="flex-1 flex flex-col justify-between p-6">
+      <div className="flex-1 flex flex-col justify-center w-full max-w-sm mx-auto text-center space-y-6">
 
         {/* Animated Spin Anchor */}
         <div className="relative size-16 mx-auto flex items-center justify-center">
@@ -146,44 +146,44 @@ export function ProcessingView({ title, onComplete }: ProcessingViewProps) {
           <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-accent block">
             [ Feature Extraction Active ]
           </span>
-          <h4 className="font-display italic text-2xl text-foreground truncate px-4">{title}</h4>
-          <p className="font-mono text-[10px] text-muted-foreground/80 tracking-wide h-4">
+          <h4 className="font-display italic text-2xl text-foreground break-words px-2">{title}</h4>
+          <p className="font-mono text-[10px] text-muted-foreground/80 tracking-wide min-h-4">
             {processStatuses[statusIndex]}
           </p>
         </div>
 
-        {/* Simulated Metrics Pipeline Grid */}
+        {/* Metrics Pipeline */}
         <div className="border border-border/20 bg-background/40 p-4 space-y-3 text-left rounded-none">
-          <div className="flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground flex items-center gap-1.5">
+          <div className="flex items-center justify-between gap-4 text-[10px] font-mono">
+            <span className="text-muted-foreground flex items-center gap-1.5 shrink-0">
               <BarChart2 className="size-3 text-accent" /> Spectral Profile:
             </span>
             {statusIndex > 0 ? (
-              <span className="text-foreground text-right animate-fade-in">BPM, Key, Valence Bound</span>
+              <span className="text-foreground text-right">BPM, Key, Valence Bound</span>
             ) : (
-              <Skeleton className="h-3 w-28 bg-foreground/5 rounded-none" />
+              <Skeleton className="h-3 w-24 bg-foreground/5 rounded-none" />
             )}
           </div>
 
-          <div className="flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground flex items-center gap-1.5">
+          <div className="flex items-center justify-between gap-4 text-[10px] font-mono">
+            <span className="text-muted-foreground flex items-center gap-1.5 shrink-0">
               <MessageSquare className="size-3 text-accent" /> Linguistic Array:
             </span>
             {statusIndex > 1 ? (
               <span className="text-foreground text-right">Lyrics Parsed via Whisper</span>
             ) : (
-              <Skeleton className="h-3 w-36 bg-foreground/5 rounded-none" />
+              <Skeleton className="h-3 w-24 bg-foreground/5 rounded-none" />
             )}
           </div>
 
-          <div className="flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground flex items-center gap-1.5">
+          <div className="flex items-center justify-between gap-4 text-[10px] font-mono">
+            <span className="text-muted-foreground flex items-center gap-1.5 shrink-0">
               <Sparkles className="size-3 text-accent" /> Emotional Mapping:
             </span>
             {statusIndex > 2 ? (
               <span className="text-foreground text-right">Brief Compiled</span>
             ) : (
-              <Skeleton className="h-3 w-20 bg-foreground/5 rounded-none" />
+              <Skeleton className="h-3 w-16 bg-foreground/5 rounded-none" />
             )}
           </div>
         </div>
