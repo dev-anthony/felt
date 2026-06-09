@@ -44,7 +44,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
       setView("email-verification");
     } else if (view === "email-verification") {
       // Final confirmation step
-      router.push("/dashboard");
+      router.push("/onboarding");
       onOpenChange(false);
     }
   };
