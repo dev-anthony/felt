@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, Image as ImageIcon, Save, X } from "lucide-react"
+import { Check, Image as ImageIcon, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
@@ -20,10 +20,10 @@ const MOCK_FILTERS = [
 ]
 
 const AVAILABLE_VARIANTS = [
-  { id: "v-1", name: "Variant Alpha", description: "Standard atmospheric distribution" },
-  { id: "v-2", name: "Variant Beta", description: "Enhanced micro-detail geometry profile" },
-  { id: "v-3", name: "Variant Gamma", description: "Abstract high-contrast generation variant" },
-  { id: "v-4", name: "Variant Delta", description: "Subdued organic lighting layout" },
+  { id: "v-1", name: "Variant Alpha", description: "Standard atmospheric distribution", style: "bg-gradient-to-br from-neutral-950 via-stone-900 to-zinc-800" },
+  { id: "v-2", name: "Variant Beta", description: "Enhanced micro-detail geometry profile", style: "bg-gradient-to-tr from-neutral-900 via-stone-800 to-neutral-700" },
+  { id: "v-3", name: "Variant Gamma", description: "Abstract high-contrast generation variant", style: "bg-gradient-to-b from-stone-900 via-zinc-900 to-stone-950" },
+  { id: "v-4", name: "Variant Delta", description: "Subdued organic lighting layout", style: "bg-gradient-to-br from-zinc-900 via-neutral-950 to-stone-900" },
 ]
 
 interface TuningWorkspaceViewProps {
@@ -48,19 +48,28 @@ export function TuningWorkspaceView({
     AVAILABLE_VARIANTS.find((v) => v.name === initialVariant) || AVAILABLE_VARIANTS[0]
   )
 
-  const [currentPage, setCurrentPage] = React.useState(1)
-  const filtersPerPage = 3
-  const totalPages = Math.ceil(MOCK_FILTERS.length / filtersPerPage)
-  const startIndex = (currentPage - 1) * filtersPerPage
-  const paginatedFilters = MOCK_FILTERS.slice(startIndex, startIndex + filtersPerPage)
+  // Isolated pagination systems to prevent container expanding/collapsing layout shifts
+  const [currentFilterPage, setCurrentFilterPage] = React.useState(1)
+  const [currentVariantPage, setCurrentVariantPage] = React.useState(1)
+  
+  const itemsPerPage = 3
+
+  // Filter computations
+  const totalFilterPages = Math.ceil(MOCK_FILTERS.length / itemsPerPage)
+  const filterStartIndex = (currentFilterPage - 1) * itemsPerPage
+  const paginatedFilters = MOCK_FILTERS.slice(filterStartIndex, filterStartIndex + itemsPerPage)
+
+  // Variant computations
+  const totalVariantPages = Math.ceil(AVAILABLE_VARIANTS.length / itemsPerPage)
+  const variantStartIndex = (currentVariantPage - 1) * itemsPerPage
+  const paginatedVariants = AVAILABLE_VARIANTS.slice(variantStartIndex, variantStartIndex + itemsPerPage)
 
   const handleApplyChanges = () => {
     onSaveUpdates(selectedFilter.id, selectedVariant.name)
   }
 
   return (
-    /* Removed layout-breaking min-h limits and let layout breathe naturally inside parent dialog bounding boxes */
-    <div className="w-full bg-[#121212] flex flex-col p-5 sm:p-6 min-w-0 overflow-hidden">
+    <div className="w-full bg-[#121212] flex flex-col  px-4 py-2 min-w-0 overflow-hidden">
       <div className="w-full max-w-md mx-auto flex flex-col space-y-4 min-w-0">
         
         {/* Upper Identity Panel */}
@@ -73,9 +82,6 @@ export function TuningWorkspaceView({
               {trackTitle}
             </h3>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-none text-muted-foreground hover:text-foreground size-8 shrink-0">
-            <X className="size-4" />
-          </Button>
         </div>
 
         {/* Unified Layout Interface Tabs */}
@@ -91,11 +97,10 @@ export function TuningWorkspaceView({
 
           {/* TAB SEGMENT ONE: STYLE FILTERS */}
           <TabsContent value="filter" className="space-y-4 focus-visible:outline-none mt-0 w-full min-w-0">
-            
-            {/* Capped Preview Frame displaying layout style definitions explicitly */}
+            {/* Filter Frame Preview */}
             <div className="w-full border border-border/40 relative flex flex-col items-center justify-center overflow-hidden bg-background min-w-0" style={{ aspectRatio: "16/9", maxHeight: "160px" }}>
               <div className={`absolute inset-0 opacity-40 blur-xl scale-110 transition-all duration-500 ${selectedFilter.style}`} />
-              <div className="relative z-10 text-center space-y-1.5 p-3 w-full min-w-0">
+              <div className="relative z-10 text-center space-y-1.5 p-3 w-full max-w-xs mx-auto min-w-0">
                 <div className="size-8 mx-auto rounded-none border border-foreground/20 flex items-center justify-center bg-[#0d0d0d] shadow-2xl shrink-0">
                   <ImageIcon className="size-3.5 text-muted-foreground stroke-[1.25px]" />
                 </div>
@@ -138,15 +143,15 @@ export function TuningWorkspaceView({
                 })}
               </div>
 
-              {/* Pagination elements layout wrappers */}
+              {/* Filter Pagination Controls */}
               <Pagination className="pt-0.5">
                 <PaginationContent className="justify-center gap-1">
                   <PaginationItem>
                     <Button
                       type="button"
                       variant="ghost"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentFilterPage === 1}
+                      onClick={() => setCurrentFilterPage(prev => Math.max(prev - 1, 1))}
                       className="disabled:opacity-20 border border-border/20 rounded-none h-6 w-6 p-0 text-xs"
                     >
                       ←
@@ -154,15 +159,15 @@ export function TuningWorkspaceView({
                   </PaginationItem>
                   <PaginationItem>
                     <span className="font-mono text-[10px] text-muted-foreground px-3 select-none">
-                      {currentPage} / {totalPages}
+                      {currentFilterPage} / {totalFilterPages}
                     </span>
                   </PaginationItem>
                   <PaginationItem>
                     <Button
                       type="button"
                       variant="ghost"
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentFilterPage === totalFilterPages}
+                      onClick={() => setCurrentFilterPage(prev => Math.min(prev + 1, totalFilterPages))}
                       className="disabled:opacity-20 border border-border/20 rounded-none h-6 w-6 p-0 text-xs"
                     >
                       →
@@ -174,43 +179,90 @@ export function TuningWorkspaceView({
           </TabsContent>
 
           {/* TAB SEGMENT TWO: MODEL VARIANTS PICKER */}
-          <TabsContent value="variant" className="space-y-2 focus-visible:outline-none mt-0 w-full min-w-0">
-            <div className="space-y-1 mb-1 min-w-0">
-              <label className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground block">
-                Select Render Layout Variant
-              </label>
+          <TabsContent value="variant" className="space-y-4 focus-visible:outline-none mt-0 w-full min-w-0">
+            {/* Variant Frame Preview — Exactly mirroring the aspect ratios and styling of the filter view */}
+            <div className="w-full border border-border/40 relative flex flex-col items-center justify-center overflow-hidden bg-background min-w-0" style={{ aspectRatio: "16/9", maxHeight: "160px" }}>
+              <div className={`absolute inset-0 opacity-40 blur-xl scale-110 transition-all duration-500 ${selectedVariant.style || 'bg-neutral-900'}`} />
+              <div className="relative z-10 text-center space-y-1.5 p-3 w-full max-w-xs mx-auto min-w-0">
+                <div className="size-8 mx-auto rounded-none border border-foreground/20 flex items-center justify-center bg-[#0d0d0d] shadow-2xl shrink-0">
+                  <ImageIcon className="size-3.5 text-muted-foreground stroke-[1.25px]" />
+                </div>
+                <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 bg-foreground text-background font-bold inline-block max-w-full truncate">
+                  Active Variant: {selectedVariant.name}
+                </span>
+              </div>
+              <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between pointer-events-none gap-4 min-w-0">
+                <span className="font-mono text-[8px] text-muted-foreground/60 tracking-wider shrink-0">DESCRIPTOR:</span>
+                <span className="font-mono text-[8px] text-accent/80 tracking-wider uppercase truncate text-right block w-full">{selectedVariant.description}</span>
+              </div>
             </div>
-            <div className="grid grid-cols-1 gap-1.5 max-h-[240px] overflow-y-auto pr-1">
-              {AVAILABLE_VARIANTS.map((variant) => {
-                const isSelected = selectedVariant.id === variant.id
-                return (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    onClick={() => setSelectedVariant(variant)}
-                    className={`p-2.5 text-left border transition-all rounded-none flex items-center justify-between gap-3 min-w-0 w-full ${
-                      isSelected
-                        ? "bg-[#161616] border-accent text-foreground"
-                        : "bg-background border-border/30 text-muted-foreground hover:border-border"
-                    }`}
-                  >
-                    <div className="space-y-0.5 min-w-0 flex-1">
-                      <span className={`font-mono text-[10px] uppercase tracking-wider block font-bold truncate ${isSelected ? "text-accent" : "text-foreground"}`}>
-                        {variant.name}
+
+            {/* Variant Selection Carousel — Identical 3 column setup */}
+            <div className="space-y-3 min-w-0">
+              <div className="grid grid-cols-3 gap-2 w-full min-w-0">
+                {paginatedVariants.map((variant) => {
+                  const isCurrent = selectedVariant.id === variant.id
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`flex flex-col items-center p-1.5 border transition-all relative group min-w-0 w-full ${
+                        isCurrent ? "border-accent bg-foreground/[0.02]" : "border-border/30 hover:border-border/80 bg-background"
+                      }`}
+                    >
+                      <div className={`aspect-square w-full relative overflow-hidden mb-1 border border-border/20 shrink-0 ${variant.style || 'bg-neutral-800'}`}>
+                        {isCurrent && (
+                          <div className="absolute inset-0 bg-background/20 backdrop-blur-xs flex items-center justify-center">
+                            <Check className="size-4 text-foreground stroke-[3px]" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="font-mono text-[8px] font-bold tracking-wide text-center block truncate w-full">
+                        {variant.name.replace("Variant ", "")}
                       </span>
-                      <span className="font-sans text-[11px] text-muted-foreground block truncate">
-                        {variant.description}
-                      </span>
-                    </div>
-                    {isSelected && <Check className="size-3.5 text-accent stroke-[2.5px] shrink-0" />}
-                  </button>
-                )
-              })}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Variant Pagination Controls */}
+              <Pagination className="pt-0.5">
+                <PaginationContent className="justify-center gap-1">
+                  <PaginationItem>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={currentVariantPage === 1}
+                      onClick={() => setCurrentVariantPage(prev => Math.max(prev - 1, 1))}
+                      className="disabled:opacity-20 border border-border/20 rounded-none h-6 w-6 p-0 text-xs"
+                    >
+                      ←
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <span className="font-mono text-[10px] text-muted-foreground px-3 select-none">
+                      {currentVariantPage} / {totalVariantPages}
+                    </span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={currentVariantPage === totalVariantPages}
+                      onClick={() => setCurrentVariantPage(prev => Math.min(prev + 1, totalVariantPages))}
+                      className="disabled:opacity-20 border border-border/20 rounded-none h-6 w-6 p-0 text-xs"
+                    >
+                      →
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           </TabsContent>
         </Tabs>
 
-        {/* Action ribbon footer toolbar options */}
+        {/* Action ribbon footer toolbar */}
         <div className="pt-3.5 flex items-center justify-end gap-3 border-t border-border/20 min-w-0 shrink-0">
           <Button
             type="button"
