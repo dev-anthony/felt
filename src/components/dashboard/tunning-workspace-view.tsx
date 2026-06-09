@@ -8,7 +8,6 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationContent as PaginationContentPrimitive,
 } from "@/components/ui/pagination"
 
 const MOCK_FILTERS = [
@@ -42,7 +41,6 @@ export function TuningWorkspaceView({
   onClose,
   onSaveUpdates,
 }: TuningWorkspaceViewProps) {
-  // Local active parameter selection states
   const [selectedFilter, setSelectedFilter] = React.useState(
     MOCK_FILTERS.find((f) => f.id === initialFilterId) || MOCK_FILTERS[0]
   )
@@ -50,7 +48,6 @@ export function TuningWorkspaceView({
     AVAILABLE_VARIANTS.find((v) => v.name === initialVariant) || AVAILABLE_VARIANTS[0]
   )
 
-  // Carousel Pagination Layout Parameters
   const [currentPage, setCurrentPage] = React.useState(1)
   const filtersPerPage = 3
   const totalPages = Math.ceil(MOCK_FILTERS.length / filtersPerPage)
@@ -62,58 +59,59 @@ export function TuningWorkspaceView({
   }
 
   return (
-    <div className="w-full bg-[#121212] flex flex-col min-h-[540px] justify-center items-center p-6">
-      <div className="w-full max-w-md mx-auto flex flex-col h-full justify-between space-y-6">
+    /* Removed layout-breaking min-h limits and let layout breathe naturally inside parent dialog bounding boxes */
+    <div className="w-full bg-[#121212] flex flex-col p-5 sm:p-6 min-w-0 overflow-hidden">
+      <div className="w-full max-w-md mx-auto flex flex-col space-y-4 min-w-0">
         
         {/* Upper Identity Panel */}
-        <div className="flex items-center justify-between border-b border-border/20 pb-3">
-          <div>
+        <div className="flex items-center justify-between border-b border-border/20 pb-3 min-w-0 shrink-0">
+          <div className="min-w-0 pr-2">
             <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-0.5">
               // Matrix Alignment Tuner
             </span>
-            <h3 className="font-display italic text-2xl text-foreground truncate max-w-[280px]">
+            <h3 className="font-display italic text-xl text-foreground truncate w-full">
               {trackTitle}
             </h3>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-none text-muted-foreground hover:text-foreground size-8">
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-none text-muted-foreground hover:text-foreground size-8 shrink-0">
             <X className="size-4" />
           </Button>
         </div>
 
-        {/* Unified Shadcn Interface Tabs Management Element Layout */}
-        <Tabs defaultValue="filter" className="w-full flex-1 flex flex-col justify-between">
-          <TabsList variant="line" className="w-full border-b border-border/20 justify-start rounded-none h-9 p-0 mb-4">
-            <TabsTrigger value="filter" className="font-mono text-[10px] tracking-widest uppercase px-4 rounded-none">
+        {/* Unified Layout Interface Tabs */}
+        <Tabs defaultValue="filter" className="w-full flex flex-col min-w-0">
+          <TabsList variant="line" className="w-full border-b border-border/20 justify-start rounded-none h-9 p-0 mb-4 shrink-0">
+            <TabsTrigger value="filter" className="font-mono text-[10px] tracking-widest uppercase px-4 rounded-none h-full">
               1. Edit Filter
             </TabsTrigger>
-            <TabsTrigger value="variant" className="font-mono text-[10px] tracking-widest uppercase px-4 rounded-none">
+            <TabsTrigger value="variant" className="font-mono text-[10px] tracking-widest uppercase px-4 rounded-none h-full">
               2. Edit Variant
             </TabsTrigger>
           </TabsList>
 
-          {/* TAB SEGMENT ONE: STYLE FILTERS CAROUSEL PREVIEW VIEWPORTS */}
-          <TabsContent value="filter" className="space-y-4 focus-visible:outline-none mt-0 flex-1 flex flex-col justify-center">
+          {/* TAB SEGMENT ONE: STYLE FILTERS */}
+          <TabsContent value="filter" className="space-y-4 focus-visible:outline-none mt-0 w-full min-w-0">
             
-            {/* Aspect Window Card Frame Display */}
-            <div className="aspect-[16/10] w-full border border-border/40 relative flex flex-col items-center justify-center overflow-hidden bg-background">
+            {/* Capped Preview Frame displaying layout style definitions explicitly */}
+            <div className="w-full border border-border/40 relative flex flex-col items-center justify-center overflow-hidden bg-background min-w-0" style={{ aspectRatio: "16/9", maxHeight: "160px" }}>
               <div className={`absolute inset-0 opacity-40 blur-xl scale-110 transition-all duration-500 ${selectedFilter.style}`} />
-              <div className="relative z-10 text-center space-y-2 p-4">
-                <div className="size-12 mx-auto rounded-none border border-foreground/20 flex items-center justify-center bg-[#0d0d0d] shadow-2xl">
-                  <ImageIcon className="size-5 text-muted-foreground stroke-[1.25px]" />
+              <div className="relative z-10 text-center space-y-1.5 p-3 w-full min-w-0">
+                <div className="size-8 mx-auto rounded-none border border-foreground/20 flex items-center justify-center bg-[#0d0d0d] shadow-2xl shrink-0">
+                  <ImageIcon className="size-3.5 text-muted-foreground stroke-[1.25px]" />
                 </div>
-                <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 bg-foreground text-background font-bold">
+                <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 bg-foreground text-background font-bold inline-block max-w-full truncate">
                   Active Filter: {selectedFilter.name}
                 </span>
               </div>
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                <span className="font-mono text-[8px] text-muted-foreground/60 tracking-wider">DESCRIPTOR:</span>
-                <span className="font-mono text-[8px] text-accent/80 tracking-wider uppercase truncate max-w-[240px]">{selectedFilter.label}</span>
+              <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between pointer-events-none gap-4 min-w-0">
+                <span className="font-mono text-[8px] text-muted-foreground/60 tracking-wider shrink-0">DESCRIPTOR:</span>
+                <span className="font-mono text-[8px] text-accent/80 tracking-wider uppercase truncate text-right block w-full">{selectedFilter.label}</span>
               </div>
             </div>
 
-            {/* Selection Carousel Row Grid */}
-            <div className="space-y-3">
-              <div className="grid grid-cols-3 gap-3">
+            {/* Selection Carousel Grid Layout */}
+            <div className="space-y-3 min-w-0">
+              <div className="grid grid-cols-3 gap-2 w-full min-w-0">
                 {paginatedFilters.map((filter) => {
                   const isCurrent = selectedFilter.id === filter.id
                   return (
@@ -121,18 +119,18 @@ export function TuningWorkspaceView({
                       key={filter.id}
                       type="button"
                       onClick={() => setSelectedFilter(filter)}
-                      className={`flex flex-col items-center p-1.5 border transition-all relative group ${
+                      className={`flex flex-col items-center p-1.5 border transition-all relative group min-w-0 w-full ${
                         isCurrent ? "border-accent bg-foreground/[0.02]" : "border-border/30 hover:border-border/80 bg-background"
                       }`}
                     >
-                      <div className={`aspect-square w-full relative overflow-hidden mb-1.5 border border-border/20 ${filter.style}`}>
+                      <div className={`aspect-square w-full relative overflow-hidden mb-1 border border-border/20 shrink-0 ${filter.style}`}>
                         {isCurrent && (
                           <div className="absolute inset-0 bg-background/20 backdrop-blur-xs flex items-center justify-center">
                             <Check className="size-4 text-foreground stroke-[3px]" />
                           </div>
                         )}
                       </div>
-                      <span className="font-mono text-[9px] font-bold tracking-wide text-center block truncate w-full">
+                      <span className="font-mono text-[8px] font-bold tracking-wide text-center block truncate w-full">
                         {filter.name}
                       </span>
                     </button>
@@ -140,8 +138,8 @@ export function TuningWorkspaceView({
                 })}
               </div>
 
-              {/* Pagination Row Indicators */}
-              <Pagination className="pt-1">
+              {/* Pagination elements layout wrappers */}
+              <Pagination className="pt-0.5">
                 <PaginationContent className="justify-center gap-1">
                   <PaginationItem>
                     <Button
@@ -155,7 +153,7 @@ export function TuningWorkspaceView({
                     </Button>
                   </PaginationItem>
                   <PaginationItem>
-                    <span className="font-mono text-[10px] text-muted-foreground px-3">
+                    <span className="font-mono text-[10px] text-muted-foreground px-3 select-none">
                       {currentPage} / {totalPages}
                     </span>
                   </PaginationItem>
@@ -175,14 +173,14 @@ export function TuningWorkspaceView({
             </div>
           </TabsContent>
 
-          {/* TAB SEGMENT TWO: ART REGENERATION MATRIX VARIANT PICKER */}
-          <TabsContent value="variant" className="space-y-3 focus-visible:outline-none mt-0 flex-1 flex flex-col justify-center">
-            <div className="space-y-1 mb-2">
-              <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground block">
+          {/* TAB SEGMENT TWO: MODEL VARIANTS PICKER */}
+          <TabsContent value="variant" className="space-y-2 focus-visible:outline-none mt-0 w-full min-w-0">
+            <div className="space-y-1 mb-1 min-w-0">
+              <label className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground block">
                 Select Render Layout Variant
               </label>
             </div>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-1.5 max-h-[240px] overflow-y-auto pr-1">
               {AVAILABLE_VARIANTS.map((variant) => {
                 const isSelected = selectedVariant.id === variant.id
                 return (
@@ -190,21 +188,21 @@ export function TuningWorkspaceView({
                     key={variant.id}
                     type="button"
                     onClick={() => setSelectedVariant(variant)}
-                    className={`p-3 text-left border transition-all rounded-none flex items-center justify-between ${
+                    className={`p-2.5 text-left border transition-all rounded-none flex items-center justify-between gap-3 min-w-0 w-full ${
                       isSelected
                         ? "bg-[#161616] border-accent text-foreground"
                         : "bg-background border-border/30 text-muted-foreground hover:border-border"
                     }`}
                   >
-                    <div className="space-y-0.5">
-                      <span className={`font-mono text-[11px] uppercase tracking-wider block font-bold ${isSelected ? "text-accent" : "text-foreground"}`}>
+                    <div className="space-y-0.5 min-w-0 flex-1">
+                      <span className={`font-mono text-[10px] uppercase tracking-wider block font-bold truncate ${isSelected ? "text-accent" : "text-foreground"}`}>
                         {variant.name}
                       </span>
-                      <span className="font-sans text-[11px] text-muted-foreground block">
+                      <span className="font-sans text-[11px] text-muted-foreground block truncate">
                         {variant.description}
                       </span>
                     </div>
-                    {isSelected && <Check className="size-4 text-accent stroke-[2.5px]" />}
+                    {isSelected && <Check className="size-3.5 text-accent stroke-[2.5px] shrink-0" />}
                   </button>
                 )
               })}
@@ -212,20 +210,20 @@ export function TuningWorkspaceView({
           </TabsContent>
         </Tabs>
 
-        {/* Global Action Execution Ribbon Footer */}
-        <div className="pt-4 flex items-center justify-end gap-3 border-t border-border/20">
+        {/* Action ribbon footer toolbar options */}
+        <div className="pt-3.5 flex items-center justify-end gap-3 border-t border-border/20 min-w-0 shrink-0">
           <Button
             type="button"
             variant="ghost"
             onClick={onClose}
-            className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4"
+            className="font-mono text-[10px] uppercase tracking-widest rounded-none h-9 px-4"
           >
             Discard
           </Button>
           <Button
             type="button"
             onClick={handleApplyChanges}
-            className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-6 bg-foreground text-background hover:bg-foreground/90 flex items-center gap-2"
+            className="font-mono text-[10px] uppercase tracking-widest rounded-none h-9 px-5 bg-foreground text-background hover:bg-foreground/90 flex items-center gap-2 shrink-0"
           >
             <Save className="size-3.5" /> Save Configuration
           </Button>

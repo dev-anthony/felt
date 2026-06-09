@@ -16,86 +16,96 @@ export function FeelingExpanderView({
   onApprove,
   onStartOver
 }: FeelingExpanderViewProps) {
-  // Initialize with your default 3am descriptive text expansion
   const [isEditing, setIsEditing] = React.useState(false)
   const [expandedText, setExpandedText] = React.useState(
     "3am in a city that never fully sleeps. The kind of night where streetlights reflect on wet concrete and everything feels heavier than it did during the day. Not dangerous — purposeful. Like someone who came out knowing exactly who they are."
   )
 
   return (
-    <div className="flex-1 flex flex-col justify-between p-6 min-h-[480px]">
-      
-      <div className="space-y-4 flex-1 flex flex-col justify-center">
-        <div>
+    <>
+      {/* Custom Ultra-Slim Scrollbar: Slate thumb, Black track, Rounded corners */}
+      <style jsx global>{`
+        .scrollbar-custom::-webkit-scrollbar {
+          width: 4px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+          background: #555;
+          border-radius: 10px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+          background: #000000; 
+          border-radius: 10px;
+        }
+        
+        /* Hide scrollbar buttons (arrows) */
+        .scrollbar-custom::-webkit-scrollbar-button {
+          display: none;
+          width: 0;
+          height: 0;
+        }
+      `}</style>
+
+      <div className="w-full max-w-full min-w-0 space-y-4 flex-1 flex flex-col justify-center">
+        <div className="w-full min-w-0">
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">
             // Neural Synergy Expander
           </span>
-          <h3 className="font-display italic text-2xl text-foreground">Aesthetic Synthesis</h3>
+          <h3 className="font-display italic text-xl sm:text-2xl text-foreground truncate w-full">Aesthetic Synthesis</h3>
         </div>
 
-        {/* Dynamic Card Container changing states contextually */}
-        <div className="border border-border/40 bg-background/50 p-5 space-y-4 relative rounded-none">
-          <div className="space-y-1">
+        <div className="w-full max-w-full min-w-0 border border-border/40 bg-background/50 p-3 space-y-3 relative rounded-none box-border">
+          <div className="w-full min-w-0">
             <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground block">
               You said:
             </span>
-            <p className="font-sans text-sm font-medium text-foreground italic">
+            <p className="font-sans text-xs sm:text-sm font-medium text-foreground italic break-words whitespace-normal">
               "{userPrompt}"
             </p>
           </div>
 
           <div className="h-px bg-border/20 w-full" />
 
-          <div className="space-y-1.5 flex-1 flex flex-col">
-            <span className="font-mono text-[9px] uppercase tracking-wider text-accent flex items-center gap-1.5">
-              <Sparkles className="size-3" /> Expanded Context Description:
+          <div className="w-full max-w-full min-w-0 space-y-1.5 flex-1 flex flex-col">
+            <span className="font-mono text-[9px] uppercase tracking-wider text-accent flex items-center gap-1.5 min-w-0 truncate">
+              <Sparkles className="size-3 shrink-0" /> Expanded Context Description:
             </span>
             
             {isEditing ? (
-              <div className="space-y-3 pt-1 flex-1 flex flex-col">
+              <div className="w-full max-w-full min-w-0 space-y-3 pt-1 flex-1 flex flex-col">
                 <Textarea
                   value={expandedText}
                   onChange={(e) => setExpandedText(e.target.value)}
-                  className="min-h-[120px] flex-1 w-full bg-background/80 border border-accent/40 focus-visible:border-accent p-3 font-sans text-xs text-foreground leading-relaxed rounded-none resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-[120px] sm:h-[140px] w-full bg-background/80 border border-accent/40 focus-visible:border-accent p-3 font-sans text-xs text-foreground leading-relaxed rounded-none resize-none focus-visible:ring-0 focus-visible:ring-offset-0 box-border overflow-y-auto scrollbar-custom"
                 />
                 <Button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="font-mono text-[9px] uppercase tracking-widest rounded-none h-8 px-3 self-end bg-accent text-background hover:bg-accent/90"
+                  className="font-mono text-[9px] uppercase tracking-widest rounded-none h-8 px-3 self-end bg-accent text-background hover:bg-accent/90 shrink-0"
                 >
                   <Save className="mr-1 size-3" /> Save Changes
                 </Button>
               </div>
             ) : (
-              <p className="font-sans text-xs text-muted-foreground/90 leading-relaxed bg-foreground/[0.01] p-3 border border-border/10 font-light">
-                {expandedText}
-              </p>
+              <div className="w-full max-w-full min-w-0 bg-foreground/[0.01] border border-border/10 font-light box-border p-3">
+                <p className="font-sans text-xs text-muted-foreground/90 leading-relaxed break-words whitespace-normal max-h-[120px] sm:max-h-[140px] overflow-y-auto scrollbar-custom">
+                  {expandedText}
+                </p>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Action Interactive Command Ribbon */}
-      <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/20 mt-6">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onStartOver}
-            disabled={isEditing}
-            className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-3 flex-1 sm:flex-none border-border/40 disabled:opacity-30"
-          >
-            <RotateCcw className="mr-1.5 size-3" /> Start Over
-          </Button>
-          
+      <div className="w-full max-w-full min-w-0 flex flex-col gap-2 sm:flex-row items-center justify-between border-t border-border/20 mt-5 sm:mt-6 shrink-0 box-border pt-4">
+        <div className="flex items-center w-full sm:w-auto min-w-0 shrink-0">
           {!isEditing && (
             <Button
               type="button"
               variant="outline"
               onClick={() => setIsEditing(true)}
-              className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-3 flex-1 sm:flex-none border-border/40"
+              className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-none h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto border-border/40 truncate flex items-center justify-center shrink-0 text-center whitespace-nowrap"
             >
-              <Edit3 className="mr-1.5 size-3" /> Edit Context
+              <Edit3 className="mr-1.5 size-3 shrink-0" /> Edit
             </Button>
           )}
         </div>
@@ -104,12 +114,11 @@ export function FeelingExpanderView({
           type="button"
           disabled={isEditing}
           onClick={() => onApprove(expandedText)}
-          className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-5 w-full sm:w-auto bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30"
+          className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-none h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30 flex items-center justify-center shrink-0 text-center whitespace-nowrap"
         >
-          <Check className="mr-1.5 size-3.5 stroke-[2.5px]" /> Looks Right — Continue
+          <Check className="mr-1.5 size-3.5 stroke-[2.5px] shrink-0" /> Continue
         </Button>
       </div>
-
-    </div>
+    </>
   )
 }
