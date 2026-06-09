@@ -180,6 +180,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
 
         {currentStep === "RESULTS" && (
           <VariantResultsView
+          trackTitle={title}
             onRegenerate={() => setCurrentStep("GENERATING_ART")}
             onSave={(variantId) => {
               onCompleteGeneration(title, trackType, metadata.selectedFilterId || "f-1", variantId)
