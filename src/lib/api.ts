@@ -7,15 +7,39 @@ const request = async <T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  let res = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    // CRITICAL: Tells the browser to send cookies along with the API request
-    credentials: 'include', 
+    credentials: 'include', // Mandates that the browser sends along your HTTP-Only cookies
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {}),
     },
   })
+
+  // 1. Intercept expired sessions on protected endpoints
+  if (res.status === 401 && path !== '/api/auth/login' && path !== '/api/auth/signup') {
+    try {
+      // Hit your backend token refresh route to silently rotate cookies
+      const refreshRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+
+      if (refreshRes.ok) {
+        // 2. Token successfully rotated! Re-execute the original network request
+        res = await fetch(`${BASE_URL}${path}`, {
+          ...options,
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+          },
+        })
+      }
+    } catch (refreshError) {
+      console.error("Critical session rotation failure:", refreshError)
+    }
+  }
 
   const data = await res.json()
 
