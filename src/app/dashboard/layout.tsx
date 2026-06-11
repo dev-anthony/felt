@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip" // Ensure this path matches your shadcn tooltip file structure
 import { AppSidebar } from "@/components/app-sidebar"
+import { UserProvider, useUser } from "@/context/userContext" // Attached context
 
 export default function DashboardLayout({
   children,
@@ -8,6 +9,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
+    <UserProvider>
     <TooltipProvider delayDuration={0}>
       <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen w-full bg-[#080808] text-foreground font-sans">
@@ -32,5 +34,6 @@ export default function DashboardLayout({
         </div>
       </SidebarProvider>
     </TooltipProvider>
+    </UserProvider>
   )
 }
