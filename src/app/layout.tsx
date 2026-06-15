@@ -83,6 +83,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      
+        <head>
+        {/* NATIVE SEQUENCE PRELOADING: Guarantees zero race conditions on mount */}
+        <script 
+          src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js" 
+          defer
+        />
+        <script 
+          src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js" 
+          defer
+        />
+        <script 
+          src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-models.js" 
+          defer
+        />
+      
+      </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${cormorantGaramond.variable} antialiased`}
       >
