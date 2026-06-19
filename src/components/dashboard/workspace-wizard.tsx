@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -7,9 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ProcessingView } from "@/components/dashboard/processing-view"
 import { FeelingExpanderView } from "@/components/dashboard/feeling-expander-view"
-import { FilterSelectionView } from "@/components/dashboard/filter-selection-view"
 import { ArtGenerationView } from "@/components/dashboard/art-generation-view"
-import { VariantResultsView } from "@/components/dashboard/variant-results-view"
 import { uploadApi } from "@/lib/api"
 
 interface WorkspaceWizardProps {
@@ -25,8 +24,9 @@ interface WorkspaceWizardProps {
 }
 
 export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: WorkspaceWizardProps) {
+  // Bypassing FILTER_SELECTION and routing directly into the Generation pipeline
   const [currentStep, setCurrentStep] = React.useState<GenerationStep>(
-    editTrack ? "FILTER_SELECTION" : "UPLOAD"
+    editTrack ? "GENERATING_ART" : "UPLOAD"
   )
   
   const [trackType, setTrackType] = React.useState<TrackType>(editTrack?.type || "vocal")
@@ -44,7 +44,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
     title: editTrack?.title || "",
     type: editTrack?.type || "vocal",
     sentencePrompt: "",
-    selectedFilterId: ""
+    selectedFilterId: "default-felt-dna"
   })
 
   const processAudioFile = (selectedFile: File) => {
@@ -69,107 +69,314 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
   /**
    * Decodes an audio file and extracts features strictly via core native Essentia.js algorithms.
    */
+  // const extractAudioFeatures = async (audioFile: File) => {
+  //   console.log("==================================================")
+  //   console.log("[FELT ENGINE] INITIALIZING CORE AUDIO DSP PIPELINE")
+  //   console.log(`[FELT ENGINE] Target File: ${audioFile.name}`)
+  //   console.log("==================================================")
+
+  //   setAnalysisStatus("Decoding audio channels...")
+
+  //   const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+  //   const arrayBuffer = await audioFile.arrayBuffer()
+  //   const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
+  //   const channelData = audioBuffer.getChannelData(0)
+
+  //   setAnalysisStatus("Extracting tempo and acoustic profiles...")
+
+  //   const targetWindow = window as any
+  //   const EssentiaClass = targetWindow.Essentia
+  //   const EssentiaWASMModule = targetWindow.EssentiaWASM
+
+  //   if (!EssentiaClass || !EssentiaWASMModule) {
+  //     throw new Error(
+  //       "Audio engine components are still initializing onto the client window context. Please try again in a moment."
+  //     )
+  //   }
+
+  //   const essentiaWASM = await EssentiaWASMModule()
+  //   const essentia = new EssentiaClass(essentiaWASM)
+  //   const vectorData = essentia.arrayToVector(channelData)
+
+  //   // 1. Run Native Foundational DSP Extractors
+  //   const rhythmResult = essentia.RhythmExtractor2013(vectorData)
+  //   const keyResult = essentia.KeyExtractor(vectorData)
+  //   const danceabilityResult = essentia.Danceability(vectorData)
+  //   const dynamicComplexityResult = essentia.DynamicComplexity(vectorData)
+  //   const loudnessResult = essentia.Loudness(vectorData)
+  //   const spectralCentroidResult = essentia.SpectralCentroidTime(vectorData)
+  //   const zcrResult = essentia.ZeroCrossingRate(vectorData)
+
+  //   // 2. Parse Validated Core Values Natively
+  //   const calculatedBpm = Math.round(rhythmResult.bpm || 120)
+  //   const detectedKey = keyResult?.key ? String(keyResult.key).trim() : "C"
+  //   const detectedScale = keyResult?.scale ? String(keyResult.scale).trim() : "major"
+  //   const computedLoudness = Math.round(loudnessResult.loudness ?? -10)
+
+  //   // Dynamic Complexity maps closely to general tracking energy
+  //   const dynamicVal = dynamicComplexityResult.dynamicComplexity || 0
+  //   const computedEnergy = Math.max(10, Math.min(100, Math.round(dynamicVal * 15)))
+
+  //   // Danceability scaling (Essentia maps up to roughly 3.0)
+  //   const computedDanceability = Math.max(0, Math.min(100, Math.round((danceabilityResult.danceability || 0) * 33.3)))
+
+  //   // Acousticness using Spectral Centroid as a direct architectural proxy 
+  //   const centroid = spectralCentroidResult.centroid || 0
+  //   const computedAcousticness = Math.max(5, Math.min(100, Math.round(100 - (centroid / 60))))
+  //   const computedSpectralBrightness = Math.max(0, Math.min(100, Math.round(centroid / 50)))
+
+  //   // Speechiness calculated from Zero Crossing Rate
+  //   const rawZcr = zcrResult.zeroCrossingRate || 0
+  //   const computedSpeechiness = Math.max(0, Math.min(100, Math.round(rawZcr * 800)))
+
+  //   // 3. Derive Synesthetic & Emotional Metadata 
+  //   let computedValence = detectedScale === "major" ? 60 : 35
+  //   if (computedEnergy > 60) {
+  //     computedValence = Math.min(100, computedValence + 15)
+  //   } else if (computedEnergy < 40) {
+  //     computedValence = Math.max(0, computedValence - 15)
+  //   }
+
+  //   // Explicit Feel-Vibe Track Mood Matrix Mapping
+  //   let trackMood = "relaxed"
+  //   if (computedEnergy > 65 && computedValence < 50) {
+  //     trackMood = "aggressive"
+  //   } else if (computedEnergy > 50 && computedValence >= 50) {
+  //     trackMood = "happy"
+  //   } else if (computedEnergy <= 40 && computedValence < 45) {
+  //     trackMood = "sad"
+  //   }
+
+  //   // 4. Safely Clear Emscripten Allocation Memory Heaps
+  //   if (vectorData && typeof vectorData.delete === "function") vectorData.delete()
+  //   if (essentia && typeof essentia.delete === "function") essentia.delete()
+
+  //   const finalizedPayload = {
+  //     bpm: calculatedBpm > 0 ? calculatedBpm : 115,
+  //     key: detectedKey,
+  //     scale: detectedScale,
+  //     energy: computedEnergy,
+  //     valence: computedValence,
+  //     danceability: computedDanceability,
+  //     acousticness: computedAcousticness,
+  //     spectral_brightness: computedSpectralBrightness,
+  //     loudness: computedLoudness,
+  //     mood: trackMood,
+  //     speechiness: computedSpeechiness,
+  //   }
+
+  //   console.log('[FELT ENGINE] DSP Features Extracted Natively:', finalizedPayload)
+  //   return finalizedPayload
+  // }
   const extractAudioFeatures = async (audioFile: File) => {
-    console.log("==================================================")
-    console.log("[FELT ENGINE] INITIALIZING CORE AUDIO DSP PIPELINE")
-    console.log(`[FELT ENGINE] Target File: ${audioFile.name}`)
-    console.log("==================================================")
+  console.log("==================================================")
+  console.log("[FELT ENGINE] INITIALIZING MULTI-VECTOR DSP PIPELINE")
+  console.log(`[FELT ENGINE] Target File: ${audioFile.name}`)
+  console.log("==================================================")
 
-    setAnalysisStatus("Decoding audio channels...")
+  setAnalysisStatus("Decoding audio channels...")
 
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
-    const arrayBuffer = await audioFile.arrayBuffer()
-    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
-    const channelData = audioBuffer.getChannelData(0)
+  const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+  const arrayBuffer = await audioFile.arrayBuffer()
+  const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
+  const channelData = audioBuffer.getChannelData(0)
 
-    setAnalysisStatus("Extracting tempo and acoustic profiles...")
+  setAnalysisStatus("Extracting core multi-dimensional profiles...")
 
-    const targetWindow = window as any
-    const EssentiaClass = targetWindow.Essentia
-    const EssentiaWASMModule = targetWindow.EssentiaWASM
+  const targetWindow = window as any
+  const EssentiaClass = targetWindow.Essentia
+  const EssentiaWASMModule = targetWindow.EssentiaWASM
 
-    if (!EssentiaClass || !EssentiaWASMModule) {
-      throw new Error(
-        "Audio engine components are still initializing onto the client window context. Please try again in a moment."
-      )
-    }
-
-    const essentiaWASM = await EssentiaWASMModule()
-    const essentia = new EssentiaClass(essentiaWASM)
-    const vectorData = essentia.arrayToVector(channelData)
-
-    // 1. Run Native Foundational DSP Extractors
-    const rhythmResult = essentia.RhythmExtractor2013(vectorData)
-    const keyResult = essentia.KeyExtractor(vectorData)
-    const danceabilityResult = essentia.Danceability(vectorData)
-    const dynamicComplexityResult = essentia.DynamicComplexity(vectorData)
-    const loudnessResult = essentia.Loudness(vectorData)
-    const spectralCentroidResult = essentia.SpectralCentroidTime(vectorData)
-    const zcrResult = essentia.ZeroCrossingRate(vectorData)
-
-    // 2. Parse Validated Core Values Natively
-    const calculatedBpm = Math.round(rhythmResult.bpm || 120)
-    const detectedKey = keyResult?.key ? String(keyResult.key).trim() : "C"
-    const detectedScale = keyResult?.scale ? String(keyResult.scale).trim() : "major"
-    const computedLoudness = Math.round(loudnessResult.loudness ?? -10)
-
-    // Dynamic Complexity maps closely to general tracking energy
-    const dynamicVal = dynamicComplexityResult.dynamicComplexity || 0
-    const computedEnergy = Math.max(10, Math.min(100, Math.round(dynamicVal * 15)))
-
-    // Danceability scaling (Essentia maps up to roughly 3.0)
-    const computedDanceability = Math.max(0, Math.min(100, Math.round((danceabilityResult.danceability || 0) * 33.3)))
-
-    // Acousticness using Spectral Centroid as a direct architectural proxy 
-    // Higher centroid means brighter, sharper, more electronic textures; lower is warmer and more acoustic
-    const centroid = spectralCentroidResult.centroid || 0
-    const computedAcousticness = Math.max(5, Math.min(100, Math.round(100 - (centroid / 60))))
-    const computedSpectralBrightness = Math.max(0, Math.min(100, Math.round(centroid / 50)))
-
-    // Speechiness calculated from Zero Crossing Rate (vocal/sharp high transients vs harmonic tones)
-    const rawZcr = zcrResult.zeroCrossingRate || 0
-    const computedSpeechiness = Math.max(0, Math.min(100, Math.round(rawZcr * 800)))
-
-    // 3. Derive Synesthetic & Emotional Metadata 
-    // Valence (Emotional Positivity): Major scale anchors positive emotional DNA, while High Energy expands it
-    let computedValence = detectedScale === "major" ? 60 : 35
-    if (computedEnergy > 60) {
-      computedValence = Math.min(100, computedValence + 15)
-    } else if (computedEnergy < 40) {
-      computedValence = Math.max(0, computedValence - 15)
-    }
-
-    // Explicit Feel-Vibe Track Mood Matrix Mapping
-    let trackMood = "relaxed"
-    if (computedEnergy > 65 && computedValence < 50) {
-      trackMood = "aggressive"
-    } else if (computedEnergy > 50 && computedValence >= 50) {
-      trackMood = "happy"
-    } else if (computedEnergy <= 40 && computedValence < 45) {
-      trackMood = "sad"
-    }
-
-    // 4. Safely Clear Emscripten Allocation Memory Heaps
-    if (vectorData && typeof vectorData.delete === "function") vectorData.delete()
-    if (essentia && typeof essentia.delete === "function") essentia.delete()
-
-    const finalizedPayload = {
-      bpm: calculatedBpm > 0 ? calculatedBpm : 115,
-      key: detectedKey,
-      scale: detectedScale,
-      energy: computedEnergy,
-      valence: computedValence,
-      danceability: computedDanceability,
-      acousticness: computedAcousticness,
-      spectral_brightness: computedSpectralBrightness,
-      loudness: computedLoudness,
-      mood: trackMood,
-      speechiness: computedSpeechiness,
-    }
-
-    console.log('[FELT ENGINE] DSP Features Extracted Natively:', finalizedPayload)
-    return finalizedPayload
+  if (!EssentiaClass || !EssentiaWASMModule) {
+    throw new Error(
+      "Audio engine components are still initializing onto the client window context. Please try again in a moment."
+    )
   }
+
+  const essentiaWASM = await EssentiaWASMModule()
+  const essentia = new EssentiaClass(essentiaWASM)
+  const vectorData = essentia.arrayToVector(channelData)
+
+  // 1. Run Native Foundational DSP Extractors
+  const rhythmResult = essentia.RhythmExtractor2013(vectorData)
+  const keyResult = essentia.KeyExtractor(vectorData)
+  const danceabilityResult = essentia.Danceability(vectorData)
+  const dynamicComplexityResult = essentia.DynamicComplexity(vectorData)
+  const loudnessResult = essentia.Loudness(vectorData)
+  const spectralCentroidResult = essentia.SpectralCentroidTime(vectorData)
+  const zcrResult = essentia.ZeroCrossingRate(vectorData)
+
+  // 2. Capture Raw Extracted Metrics Safely
+  const rawBpm = rhythmResult.bpm
+  const rawLoudness = loudnessResult.loudness ?? -12
+  const rawCentroid = spectralCentroidResult.centroid || 1500
+  const rawComplexity = dynamicComplexityResult.dynamicComplexity
+  const rawDanceability = danceabilityResult.danceability
+  const rawZcr = zcrResult.zeroCrossingRate
+
+  // Convert incoming native features to standardized 0.0 - 1.0 vector space scales
+  const currentVector: Record<string, number | null> = {
+    bpm: (rawBpm && rawBpm > 0) ? Math.max(0, Math.min(1, (rawBpm - 60) / 105)) : null, // 60-165 BPM range normalization
+    energy: (rawComplexity && rawComplexity > 0) ? Math.max(0, Math.min(1, rawComplexity * 0.15)) : null,
+    danceability: (rawDanceability && rawDanceability > 0) ? Math.max(0, Math.min(1, rawDanceability)) : null,
+    brightness: rawCentroid ? Math.max(0, Math.min(1, rawCentroid / 4000)) : null,
+    loudness: Math.max(0, Math.min(1, (rawLoudness + 60) / 60)), // -60dB to 0dB standard dynamic threshold range
+    speechiness: (rawZcr && rawZcr > 0) ? Math.max(0, Math.min(1, rawZcr * 2.0)) : null
+  }
+
+  // 3. Define the Multi-Dimensional Cluster Profiles
+  const VECTOR_CLUSTERS = {
+    HIGH_ENERGY_POSITIVE: {
+      id: "HIGH_ENERGY_POSITIVE",
+      mood: "happy",
+      scale: "major",
+      centers: { bpm: 0.61, energy: 0.82, danceability: 0.72, brightness: 0.75, loudness: 0.92, speechiness: 0.12 },
+      ranges: { bpm: [115, 140], energy: [0.70, 0.95], valence: [0.65, 0.95], danceability: [0.60, 0.85], acousticness: [0.01, 0.20], brightness: [0.60, 0.90], speechiness: [0.03, 0.12] }
+    },
+    HIGH_ENERGY_NEGATIVE: {
+      id: "HIGH_ENERGY_NEGATIVE",
+      mood: "aggressive",
+      scale: "minor",
+      centers: { bpm: 0.76, energy: 0.88, danceability: 0.68, brightness: 0.80, loudness: 0.93, speechiness: 0.48 },
+      ranges: { bpm: [130, 165], energy: [0.75, 0.99], valence: [0.05, 0.35], danceability: [0.55, 0.80], acousticness: [0.00, 0.15], brightness: [0.65, 0.95], speechiness: [0.08, 0.45] }
+    },
+    LOW_ENERGY_POSITIVE: {
+      id: "LOW_ENERGY_POSITIVE",
+      mood: "relaxed",
+      scale: "major",
+      centers: { bpm: 0.23, energy: 0.35, danceability: 0.58, brightness: 0.35, loudness: 0.84, speechiness: 0.08 },
+      ranges: { bpm: [70, 100], energy: [0.15, 0.50], valence: [0.45, 0.75], danceability: [0.40, 0.70], acousticness: [0.40, 0.90], brightness: [0.20, 0.50], speechiness: [0.02, 0.08] }
+    },
+    LOW_ENERGY_NEGATIVE: {
+      id: "LOW_ENERGY_NEGATIVE",
+      mood: "sad",
+      scale: "minor",
+      centers: { bpm: 0.17, energy: 0.28, danceability: 0.48, brightness: 0.25, loudness: 0.81, speechiness: 0.10 },
+      ranges: { bpm: [60, 95], energy: [0.10, 0.45], valence: [0.02, 0.30], danceability: [0.30, 0.65], acousticness: [0.45, 0.95], brightness: [0.10, 0.40], speechiness: [0.03, 0.10] }
+    },
+    DARK_TENSION: {
+      id: "DARK_TENSION",
+      mood: "anxious",
+      scale: "minor",
+      centers: { bpm: 0.42, energy: 0.62, danceability: 0.52, brightness: 0.48, loudness: 0.88, speechiness: 0.14 },
+      ranges: { bpm: [80, 125], energy: [0.45, 0.80], valence: [0.05, 0.30], danceability: [0.35, 0.68], acousticness: [0.05, 0.55], brightness: [0.30, 0.70], speechiness: [0.03, 0.15] }
+    },
+    LOVE_INTIMACY: {
+      id: "LOVE_INTIMACY",
+      mood: "romantic",
+      scale: "major",
+      centers: { bpm: 0.30, energy: 0.48, danceability: 0.66, brightness: 0.45, loudness: 0.87, speechiness: 0.16 },
+      ranges: { bpm: [80, 110], energy: [0.35, 0.65], valence: [0.38, 0.68], danceability: [0.55, 0.78], acousticness: [0.15, 0.60], brightness: [0.30, 0.60], speechiness: [0.04, 0.18] }
+    }
+  }
+
+  // 4. Relational Evaluation Across Available Dimensions Only
+  let targetCluster = VECTOR_CLUSTERS.LOW_ENERGY_POSITIVE
+  let shortestDistance = Infinity
+
+  Object.values(VECTOR_CLUSTERS).forEach((cluster) => {
+    let sumOfSquares = 0
+    let activeDimensionsCount = 0
+
+    Object.keys(currentVector).forEach((key) => {
+      const currentVal = currentVector[key]
+      if (currentVal !== null && !isNaN(currentVal)) {
+        const targetCenter = (cluster.centers as any)[key]
+        sumOfSquares += Math.pow(currentVal - targetCenter, 2)
+        activeDimensionsCount++
+      }
+    })
+
+    const distance = activeDimensionsCount > 0 ? Math.sqrt(sumOfSquares) : Infinity
+    
+    if (distance < shortestDistance) {
+      shortestDistance = distance
+      targetCluster = cluster
+    }
+  })
+
+  // 5. Calculate Unified Interpolation Parameter From Active Tracking Nodes
+  let totalNormalizedWeight = 0
+  let validFeaturesCount = 0
+  Object.values(currentVector).forEach(val => {
+    if (val !== null && !isNaN(val)) {
+      totalNormalizedWeight += val
+      validFeaturesCount++
+    }
+  })
+  const unifiedProgressFactor = validFeaturesCount > 0 ? (totalNormalizedWeight / validFeaturesCount) : 0.5
+
+  // STRICT PASS-THROUGH CONTEXT REPAIR UTILITY
+  const resolveMetric = (rawVal: number | null | undefined, key: string, multiplier = 1) => {
+    // If the value exists natively from Essentia, prioritize and return it directly
+    if (rawVal !== null && rawVal !== undefined && rawVal > 0 && !isNaN(rawVal)) {
+      return Math.round(rawVal * multiplier)
+    }
+    
+    // Otherwise, safely interpolate the data matching the vector space quadrant profile
+    const range = (targetCluster.ranges as any)[key]
+    if (!range) return Math.round(unifiedProgressFactor * multiplier)
+    
+    const interpolatedValue = range[0] + (range[1] - range[0]) * unifiedProgressFactor
+    return Math.round(interpolatedValue * multiplier)
+  }
+
+  // 6. Build Content Property Maps Natively
+  const finalBpm = resolveMetric(rawBpm, "bpm", 1)
+  const rawKey = keyResult?.key ? String(keyResult.key).trim() : (targetCluster.scale === "major" ? "C" : "A")
+  const rawScale = keyResult?.scale ? String(keyResult.scale).trim() : targetCluster.scale
+
+  const finalEnergy = resolveMetric(rawComplexity ? (rawComplexity * 15) : null, "energy", 1)
+  const finalValence = resolveMetric(keyResult?.scale ? (rawScale === "major" ? 65 : 25) : null, "valence", 1)
+  const finalDanceability = resolveMetric(rawDanceability ? (rawDanceability * 33.3) : null, "danceability", 1)
+  
+  const nativeAcousticness = rawDanceability ? (100 - ((rawCentroid / 4000) * 100)) : null
+  const finalAcousticness = resolveMetric(nativeAcousticness, "acousticness", 1)
+  
+  const finalBrightness = Math.max(0, Math.min(100, Math.round((currentVector.brightness || unifiedProgressFactor) * 100)))
+  const finalSpeechiness = resolveMetric(rawZcr ? (rawZcr * 800) : null, "speechiness", 1)
+
+  // ==========================================
+  // 7. CULTURAL GENRE BEHAVIOR MAPPER
+  // ==========================================
+  let finalGenre = "hip-hop" // Universal default fallback anchor
+
+  if (currentVector.speechiness && currentVector.speechiness > 0.35 && finalBpm >= 120) {
+    finalGenre = "trap / drill"
+  } else if (currentVector.speechiness && currentVector.speechiness > 0.25 && finalBpm < 115) {
+    finalGenre = "boom bap / retro rap"
+  } else if (currentVector.brightness && currentVector.brightness > 0.65 && finalEnergy > 70) {
+    finalGenre = "electronic / dance"
+  } else if (finalAcousticness > 65 && finalEnergy < 45) {
+    finalGenre = "acoustic / neo-soul"
+  } else if (finalDanceability > 65 && finalValence > 55) {
+    finalGenre = "pop / afrobeat"
+  } else if (targetCluster.id === "DARK_TENSION") {
+    finalGenre = "cinematic / ambient trap"
+  }
+
+  // 8. Clear Emscripten Allocation Memory Heaps Safely
+  if (vectorData && typeof vectorData.delete === "function") vectorData.delete()
+  if (essentia && typeof essentia.delete === "function") essentia.delete()
+
+  const finalizedPayload = {
+    bpm: finalBpm,
+    key: rawKey,
+    scale: rawScale,
+    energy: Math.max(10, Math.min(100, finalEnergy)),
+    valence: Math.max(0, Math.min(100, finalValence)),
+    danceability: Math.max(0, Math.min(100, finalDanceability)),
+    acousticness: Math.max(5, Math.min(100, finalAcousticness)),
+    spectral_brightness: finalBrightness,
+    loudness: Math.round(rawLoudness),
+    mood: targetCluster.mood,
+    speechiness: Math.max(0, Math.min(100, finalSpeechiness)),
+    genre: finalGenre // Exposed directly to feed your structural brief prompt generation layer
+  }
+
+  console.log('[FELT ENGINE] DSP Features Extracted Relationally:', finalizedPayload)
+  return finalizedPayload
+}
 
   const handleProceed = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -190,7 +397,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
         title,
         type: trackType,
         sentencePrompt: prompt,
-        selectedFilterId: "",
+        selectedFilterId: "default-felt-dna",
       })
 
       // 2. Compute Audio Analytics Natively
@@ -200,7 +407,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
       setAnalysisStatus("Finalizing feature alignment maps...")
       await uploadApi.submitAnalysis(trackId, features)
 
-      // 4. Step Transition Routing
+      // 4. Modified Flow Step Transition Routing
       if (trackType === "instrumental") {
         setCurrentStep("FEELING_EXPANDER")
       } else {
@@ -222,9 +429,9 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
           className="h-full bg-accent transition-all duration-300"
           style={{
             width:
-              currentStep === "UPLOAD" ? "20%" :
-              currentStep === "FILTER_SELECTION" ? "60%" :
-              currentStep === "RESULTS" ? "100%" : "40%",
+              currentStep === "UPLOAD" ? "25%" :
+              currentStep === "FEELING_EXPANDER" ? "50%" :
+              currentStep === "PROCESSING" ? "75%" : "100%",
           }}
         />
       </div>
@@ -347,7 +554,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
         )}
 
         {currentStep === "PROCESSING" && (
-          <ProcessingView title={title} onComplete={() => setCurrentStep("FILTER_SELECTION")} />
+          <ProcessingView title={title} onComplete={() => setCurrentStep("GENERATING_ART")} />
         )}
 
         {currentStep === "FEELING_EXPANDER" && (
@@ -368,27 +575,12 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
           />
         )}
 
-        {currentStep === "FILTER_SELECTION" && (
-          <FilterSelectionView
-            trackTitle={title}
-            onProceed={(filterId) => {
-              setMetadata(prev => ({ ...prev, selectedFilterId: filterId }))
-              setCurrentStep("GENERATING_ART")
-            }}
-          />
-        )}
-
         {currentStep === "GENERATING_ART" && (
-          <ArtGenerationView onComplete={() => setCurrentStep("RESULTS")} />
-        )}
-
-        {currentStep === "RESULTS" && (
-          <VariantResultsView
-            trackTitle={title}
-            onRegenerate={() => setCurrentStep("GENERATING_ART")}
-            onSave={(variantId) => {
-              onCompleteGeneration(title, trackType, metadata.selectedFilterId || "f-1", variantId)
-            }}
+          <ArtGenerationView 
+            onComplete={() => {
+              // Direct completion hook execution instead of hitting a selection dashboard stage
+              onCompleteGeneration(title, trackType, metadata.selectedFilterId || "default-felt-dna")
+            }} 
           />
         )}
       </form>
