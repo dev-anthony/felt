@@ -1,25 +1,57 @@
+
 // "use client"
 
 // import * as React from "react"
-// import { Sparkles, Edit3, RotateCcw, Check, Save } from "lucide-react"
+// import { Sparkles, Edit3, RotateCcw, Check, Save, Loader2 } from "lucide-react"
 // import { Button } from "@/components/ui/button"
 // import { Textarea } from "@/components/ui/textarea"
+// import { generationApi } from "@/lib/api"
 
 // interface FeelingExpanderViewProps {
 //   userPrompt: string
+//   trackId: string
 //   onApprove: (expandedText: string) => void
 //   onStartOver: () => void
 // }
 
 // export function FeelingExpanderView({
 //   userPrompt,
+//   trackId,
 //   onApprove,
 //   onStartOver
 // }: FeelingExpanderViewProps) {
 //   const [isEditing, setIsEditing] = React.useState(false)
-//   const [expandedText, setExpandedText] = React.useState(
-//     "3am in a city that never fully sleeps. The kind of night where streetlights reflect on wet concrete and everything feels heavier than it did during the day. Not dangerous — purposeful. Like someone who came out knowing exactly who they are."
-//   )
+//   const [expandedText, setExpandedText] = React.useState("")
+//   const [isLoading, setIsLoading] = React.useState(true)
+//   const [error, setError] = React.useState<string | null>(null)
+
+//   // Call the Feeling Expander as soon as this view mounts
+//   const fetchExpansion = React.useCallback(async () => {
+//     setIsLoading(true)
+//     setError(null)
+
+//     try {
+//       const data = await generationApi.expand({
+//         upload_id: trackId,
+//         basic_input: userPrompt,
+//       })
+//       setExpandedText(data.expanded)
+//     } catch (err: any) {
+//       console.error("Feeling Expander error:", err)
+//       setError(err?.message || "Something went wrong. Please try again.")
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }, [trackId, userPrompt])
+
+//   React.useEffect(() => {
+//     fetchExpansion()
+//   }, [fetchExpansion])
+
+//   // "Start over" should reset and re-call the expander with a fresh request
+//   const handleStartOver = () => {
+//     onStartOver()
+//   }
 
 //   return (
 //     <>
@@ -69,8 +101,27 @@
 //             <span className="font-mono text-[9px] uppercase tracking-wider text-accent flex items-center gap-1.5 min-w-0 truncate">
 //               <Sparkles className="size-3 shrink-0" /> Expanded Context Description:
 //             </span>
-            
-//             {isEditing ? (
+
+//             {isLoading ? (
+//               <div className="w-full bg-foreground/[0.01] border border-border/10 p-3 flex items-center justify-center gap-2 min-h-[100px]">
+//                 <Loader2 className="size-3.5 animate-spin text-accent" />
+//                 <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground animate-pulse">
+//                   Feeling the music...
+//                 </span>
+//               </div>
+//             ) : error ? (
+//               <div className="w-full bg-foreground/[0.01] border border-destructive/30 p-3 space-y-2">
+//                 <p className="font-mono text-[10px] text-destructive">{error}</p>
+//                 <Button
+//                   type="button"
+//                   variant="outline"
+//                   onClick={fetchExpansion}
+//                   className="font-mono text-[9px] uppercase tracking-widest rounded-none h-8 px-3 border-border/40"
+//                 >
+//                   <RotateCcw className="mr-1 size-3" /> Try again
+//                 </Button>
+//               </div>
+//             ) : isEditing ? (
 //               <div className="w-full max-w-full min-w-0 space-y-3 pt-1 flex-1 flex flex-col">
 //                 <Textarea
 //                   value={expandedText}
@@ -97,8 +148,18 @@
 //       </div>
 
 //       <div className="w-full max-w-full min-w-0 flex flex-col gap-2 sm:flex-row items-center justify-between border-t border-border/20 mt-5 sm:mt-6 shrink-0 box-border pt-4">
-//         <div className="flex items-center w-full sm:w-auto min-w-0 shrink-0">
-//           {!isEditing && (
+//         <div className="flex items-center w-full sm:w-auto min-w-0 shrink-0 gap-2">
+//           <Button
+//             type="button"
+//             variant="outline"
+//             onClick={handleStartOver}
+//             disabled={isLoading}
+//             className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-none h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto border-border/40 truncate flex items-center justify-center shrink-0 text-center whitespace-nowrap"
+//           >
+//             <RotateCcw className="mr-1.5 size-3 shrink-0" /> Start Over
+//           </Button>
+
+//           {!isEditing && !isLoading && !error && (
 //             <Button
 //               type="button"
 //               variant="outline"
@@ -112,7 +173,7 @@
 
 //         <Button
 //           type="button"
-//           disabled={isEditing}
+//           disabled={isEditing || isLoading || !!error}
 //           onClick={() => onApprove(expandedText)}
 //           className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-none h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30 flex items-center justify-center shrink-0 text-center whitespace-nowrap"
 //         >
@@ -147,9 +208,16 @@ export function FeelingExpanderView({
   const [expandedText, setExpandedText] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  
+  // Guard reference tracking network execution state
+  const hasFetched = React.useRef<string | null>(null)
 
-  // Call the Feeling Expander as soon as this view mounts
-  const fetchExpansion = React.useCallback(async () => {
+  // Call the Feeling Expander safely
+  const fetchExpansion = React.useCallback(async (force = false) => {
+    // Prevent double invocation if already executing or completed for this trackId
+    if (!force && hasFetched.current === trackId) return
+    
+    hasFetched.current = trackId
     setIsLoading(true)
     setError(null)
 
@@ -161,6 +229,8 @@ export function FeelingExpanderView({
       setExpandedText(data.expanded)
     } catch (err: any) {
       console.error("Feeling Expander error:", err)
+      // Clear guard pointer on error so retry functions can run cleanly
+      hasFetched.current = null
       setError(err?.message || "Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
@@ -171,8 +241,8 @@ export function FeelingExpanderView({
     fetchExpansion()
   }, [fetchExpansion])
 
-  // "Start over" should reset and re-call the expander with a fresh request
   const handleStartOver = () => {
+    hasFetched.current = null
     onStartOver()
   }
 
@@ -225,7 +295,7 @@ export function FeelingExpanderView({
               <Sparkles className="size-3 shrink-0" /> Expanded Context Description:
             </span>
 
-            {isLoading ? (
+            { isLoading ? (
               <div className="w-full bg-foreground/[0.01] border border-border/10 p-3 flex items-center justify-center gap-2 min-h-[100px]">
                 <Loader2 className="size-3.5 animate-spin text-accent" />
                 <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground animate-pulse">
@@ -238,7 +308,7 @@ export function FeelingExpanderView({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={fetchExpansion}
+                  onClick={() => fetchExpansion(true)}
                   className="font-mono text-[9px] uppercase tracking-widest rounded-none h-8 px-3 border-border/40"
                 >
                   <RotateCcw className="mr-1 size-3" /> Try again
@@ -265,7 +335,8 @@ export function FeelingExpanderView({
                   {expandedText}
                 </p>
               </div>
-            )}
+            )
+          }
           </div>
         </div>
       </div>
