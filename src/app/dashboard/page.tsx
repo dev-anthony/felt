@@ -20,6 +20,9 @@ export default function DashboardPage() {
   const [loadingUploads, setLoadingUploads] = React.useState(true)
   const [isUploadOpen, setIsUploadOpen] = React.useState(false)
   const [isTuneOpen, setIsTuneOpen] = React.useState(false)
+  
+  // 🛠️ Bulletproof local session cache to map image URLs cleanly by track title
+  const [sessionCoverCache, setSessionCoverCache] = React.useState<Record<string, string>>({})
 
   const [editingTrack, setEditingTrack] = React.useState<{
     id: string
@@ -28,7 +31,7 @@ export default function DashboardPage() {
     variant: string
   } | null>(null)
 
-  // Fetch true database tracks on mount
+  // Fetch true database uploads stream on mount
   const fetchDashboardData = React.useCallback(async () => {
     try {
       const data = await uploadApi.getUploads(20, 0)
@@ -46,29 +49,21 @@ export default function DashboardPage() {
     }
   }, [userLoading, user, fetchDashboardData])
 
-  // Updated to accept the finalized image asset passed up from the pipeline array
+  // 🛠️ Capture image url straight out of ArtGenerationView workflow
   const handleFreshGenerationComplete = (title: string, type: string, filterId: string, imageUrl?: string) => {
     console.log(`[DASHBOARD ROOT] Generation finalized asset caught:`, { title, type, filterId, imageUrl })
     
-    // Re-trigger database synchronization directly to populate structural data states safely
+    if (imageUrl) {
+      setSessionCoverCache(prev => ({
+        ...prev,
+        [title]: imageUrl
+      }))
+    }
+    
+    // Refresh core layout cleanly
     fetchDashboardData()
     setIsUploadOpen(false)
   }
-
-  // const handleOpenFilterEdit = (trackId: string) => {
-  //   const track = uploads.find(t => t.id === trackId)
-  //   if (track) {
-  //     // Pull down the first generation properties if they exist
-  //     const activeGen = track.generations?.[0]
-  //     setEditingTrack({
-  //       id: track.id,
-  //       title: track.title,
-  //       filterId: activeGen?.filter_id || "f-1",
-  //       variant: activeGen?.variant_selected || "Variant Alpha"
-  //     })
-  //     setIsTuneOpen(true)
-  //   }
-  // }
 
   if (userLoading || loadingUploads) {
     return (
@@ -131,7 +126,6 @@ export default function DashboardPage() {
         </div>
 
         {uploads.length === 0 ? (
-          /* Empty Message Display State Container */
           <div className="w-full min-h-[350px] border border-dashed border-border/20 flex flex-col items-center justify-center p-8 text-center bg-foreground/[0.01]">
             <Music4 className="size-8 text-muted-foreground/20 stroke-[1px] mb-4" />
             <p className="font-display italic text-xl text-foreground mb-1">The canvas is silent.</p>
@@ -148,7 +142,11 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {uploads.map((track) => {
-              const activeGen = track.generations?.[0]
+              // 🛠️ Read database embed array first, fall back safely to local session cache if empty
+              const dbImage = track.generations?.[0]?.image_url
+              const cachedImage = sessionCoverCache[track.title]
+              const finalImageUrl = dbImage || cachedImage
+              
               const displayDate = new Date(track.created_at).toLocaleDateString('en-US', {
                 month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
               })
@@ -177,9 +175,9 @@ export default function DashboardPage() {
 
                   <CardContent className="p-4 pt-0">
                     <div className="aspect-square w-full bg-foreground/[0.02] border border-border/20 flex flex-col items-center justify-center relative group-hover:bg-foreground/[0.04] transition-all">
-                      {activeGen?.image_url ? (
+                      {finalImageUrl ? (
                         <img 
-                          src={activeGen.image_url} 
+                          src={finalImageUrl} 
                           alt={track.title} 
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                         />
@@ -191,7 +189,6 @@ export default function DashboardPage() {
                       )}
 
                       <button
-                        
                         className="absolute top-3 right-3 p-1.5 bg-[#080808] border border-border/40 text-muted-foreground hover:text-foreground opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                         title="Tune Style & Model Variant"
                       >
@@ -223,7 +220,7 @@ export default function DashboardPage() {
               initialFilterId={editingTrack.filterId}
               initialVariant={editingTrack.variant}
               onClose={() => { setIsTuneOpen(false); setEditingTrack(null) }}
-              onSaveUpdates={() => {}} // Hook your backend patch method up here when ready
+              onSaveUpdates={() => {}} 
             />
           )}
         </DialogContent>
