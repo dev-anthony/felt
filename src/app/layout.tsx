@@ -53,11 +53,13 @@ import { AuthProviderWrapper} from "@/components/providers/app-provider-wrapper"
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  preload: false,
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  preload: false,
 });
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -65,6 +67,7 @@ const cormorantGaramond = Cormorant_Garamond({
   style: ["italic"],
   weight: ["400", "500"],
   variable: "--font-display",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -83,8 +86,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      
-        <head>
+      <head>
         {/* NATIVE SEQUENCE PRELOADING: Guarantees zero race conditions on mount */}
         <script 
           src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js" 
@@ -98,12 +100,10 @@ export default function RootLayout({
           src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-models.js" 
           defer
         />
-      
       </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${cormorantGaramond.variable} antialiased`}
       >
-        {/* We wrap the children inside a dynamic provider that listens to the URL state */}
         <AuthProviderWrapper>
           {children}
         </AuthProviderWrapper>

@@ -1,11 +1,10 @@
 "use client";
 // src/components/providers/auth-provider-wrapper.tsx
-
 import * as React from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { AuthDialog } from "@/components/auth-dialog";
 
-export function AuthProviderWrapper({ children }: { children: React.ReactNode }) {
+function AuthProviderWrapperInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -23,9 +22,6 @@ export function AuthProviderWrapper({ children }: { children: React.ReactNode })
 
   const handleOpenChange = (open: boolean) => {
     setIsAuthOpen(open);
-    
-    // If they cancel out of the modal manually while sitting on a protected route,
-    // safely bounce them back to the landing page.
     if (!open && pathname !== "/") {
       router.push("/");
     }
@@ -36,8 +32,15 @@ export function AuthProviderWrapper({ children }: { children: React.ReactNode })
       <div className={triggerAuth ? "pointer-events-none blur-sm opacity-30 select-none transition-all duration-300" : ""}>
         {children}
       </div>
-
       <AuthDialog open={isAuthOpen} onOpenChange={handleOpenChange} />
     </>
+  );
+}
+
+export function AuthProviderWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <React.Suspense fallback={<>{children}</>}>
+      <AuthProviderWrapperInner>{children}</AuthProviderWrapperInner>
+    </React.Suspense>
   );
 }
