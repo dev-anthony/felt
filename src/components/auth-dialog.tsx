@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { authApi } from "@/lib/api";
+import { authApi, User } from "@/lib/api";
 
 interface AuthDialogProps {
   open: boolean;
