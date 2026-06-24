@@ -2,14 +2,12 @@
 
 import * as React from "react"
 import { User, userApi, authApi } from "@/lib/api"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 interface UserContextType {
   user: User | null
   loading: boolean
-setUser: (user: User | null) => void
-  refreshUser: () => Promise<void>
-
+  setUser: (user: User | null) => void
   logout: () => Promise<void>
 }
 
@@ -20,13 +18,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true)
   const router = useRouter()
 
-  // Boot once on mount — cookie is settled by this point
+  // Boot once on mount — cookie is always settled by this point
   React.useEffect(() => {
     userApi.getMe()
       .then(data => setUser(data.user))
       .catch(() => setUser(null))
       .finally(() => setLoading(false))
-  }, []) // ← empty deps, runs once only
+  }, [])
 
   const logout = async () => {
     await authApi.logout()
@@ -44,7 +42,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 export function useUser() {
   const context = React.useContext(UserContext)
   if (context === undefined) {
-    throw new Error("useUser must be utilized beneath a corresponding UserProvider block")
+    throw new Error("useUser must be used within a UserProvider")
   }
   return context
 }

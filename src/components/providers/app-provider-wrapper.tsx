@@ -2,10 +2,12 @@
 import * as React from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { AuthDialog } from "@/components/auth-dialog";
+import { useUser } from "@/context/userContext";
 
 export function AuthProviderWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { setUser } = useUser();
   const [isAuthOpen, setIsAuthOpen] = React.useState(false);
 
   const handleOpenChange = (open: boolean) => {
@@ -14,17 +16,18 @@ export function AuthProviderWrapper({ children }: { children: React.ReactNode })
       router.push("/");
     }
   };
-  const { setUser } = useUser()
+
   return (
     <>
       <div className={isAuthOpen ? "pointer-events-none blur-sm opacity-30 select-none transition-all duration-300" : ""}>
         {children}
       </div>
-      <AuthDialog 
-        open={isAuthOpen} 
+      <AuthDialog
+        open={isAuthOpen}
         onOpenChange={handleOpenChange}
         onLoginSuccess={(user) => {
-          setUser(user) // ← user lands in state immediately, no re-fetch
+          setUser(user)
+          setIsAuthOpen(false)
         }}
       />
       <React.Suspense fallback={null}>
