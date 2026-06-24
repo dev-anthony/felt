@@ -12,7 +12,6 @@ import { uploadApi } from "@/lib/api"
 
 interface WorkspaceWizardProps {
   onClose: () => void
-  // 🛠️ Unified Signature: Fourth parameter changed explicitly to imageUrl to bubble out to Dashboard Page
   onCompleteGeneration: (title: string, type: string, filterId: string, imageUrl?: string) => void
   editTrack?: {
     id: string
@@ -24,7 +23,7 @@ interface WorkspaceWizardProps {
 }
 
 export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: WorkspaceWizardProps) {
-  // Bypassing FILTER_SELECTION and routing directly into the Generation pipeline
+ 
   const [currentStep, setCurrentStep] = React.useState<GenerationStep>(
     editTrack ? "GENERATING_ART" : "UPLOAD"
   )

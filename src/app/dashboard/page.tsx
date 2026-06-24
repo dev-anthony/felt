@@ -240,7 +240,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, Dialog
 import { WorkspaceWizard } from "@/components/dashboard/workspace-wizard"
 import { TuningWorkspaceView } from "@/components/dashboard/tunning-workspace-view"
 import { useUser } from "@/context/userContext" 
-import { uploadApi, UploadRecord } from "@/lib/api"
+import { uploadApi, UploadRecord, generationApi } from "@/lib/api"
 
 // Define modern structure matching revamped TuningWorkspace requirements
 interface EditingTrackState {
@@ -300,52 +300,50 @@ export default function DashboardPage() {
     setIsUploadOpen(false)
   }
 
-  // ─── 🛠️ NEW: REGENERATION HANDLER STRAPPED TO COMPONENT PIPELINE ───────
-  const handleRegenerateArt = async (uploadId: string, updatedPrompt: string) => {
-    try {
-      // Hit your active generation route with modified user prompt criteria
-      const response = await fetch("http://localhost:4000/api/generations/refine", {
-        method: "PATCH",
-        headers: { 
-          "Content-Type": "application/json",
-          // Pass authorization token context headers if your requireAuth middleware utilizes them here:
-          // "Authorization": `Bearer ${token}` 
-        },
-        body: JSON.stringify({
-          upload_id: uploadId,
-          lyric_context: updatedPrompt,
-         image_url: editingTrack?.currentImageUrl || null // Overrides sentence_prompt inside backend code block!
-        }),
+// Inside Dashboard page.tsx container view
+const handleRegenerateArt = async (uploadId: string, updatedPrompt: string, expandedDescription?: string) => {
+  try {
+    // ─── RUN NATIVE WRAPPER PIPELINE REFINE ENGINE ───
+    const result = await generationApi.refine({
+      upload_id: uploadId,
+      // Pass the high-aesthetic descriptive block returned from Gemini!
+      lyric_context: expandedDescription || updatedPrompt, 
+      image_url: editingTrack?.currentImageUrl 
+    });
+
+    // Update state layers perfectly across components
+    setUploads((prev) =>
+      prev.map((upload) => {
+        if (upload.id === uploadId) {
+          return {
+            ...upload,
+            sentence_prompt: updatedPrompt, // Cache their raw input text base
+            generations: [
+              {
+                id: result.generation_id,
+                upload_id: uploadId,
+                user_id: "", 
+                image_url: result.image_url,
+                status: "complete",
+                created_at: new Date().toISOString(),
+                prompt_used: expandedDescription || updatedPrompt,
+              },
+              ...(upload.generations || []),
+            ],
+          };
+        }
+        return upload;
       })
+    );
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to trigger re-compilation loop.")
-      }
+    // Update active editor image state instantly
+    setEditingTrack((prev) => (prev ? { ...prev, currentImageUrl: result.image_url } : null));
 
-      const generatedData = await response.json()
-      
-      // Update local tracking caches immediately so UI matches on screen
-      const trackRecord = uploads.find(u => u.id === uploadId)
-      if (trackRecord && generatedData.image_url) {
-        setSessionCoverCache(prev => ({
-          ...prev,
-          [trackRecord.title]: generatedData.image_url
-        }))
-      }
-
-      // Re-fetch core dashboard data array to update real schema states inside table records
-      await fetchDashboardData()
-      
-      // Cleanly close out workspace tuner
-      setIsTuneOpen(false)
-      setEditingTrack(null)
-
-    } catch (error) {
-      console.error("❌ [REGEN HANDLER EXCEPTION]:", error)
-      throw error // Re-throw to allow component loading buttons to clear properly
-    }
+  } catch (err: any) {
+    console.error("❌ [REGEN HANDLER EXCEPTION]:", err);
+    throw err; // Escapes directly back to clear workspace loaders seamlessly
   }
+};
 
   if (userLoading || loadingUploads) {
     return (
@@ -514,9 +512,12 @@ export default function DashboardPage() {
               uploadId={editingTrack.id}
               trackTitle={editingTrack.title}
               currentImageUrl={editingTrack.currentImageUrl}
-              expandedFeeling={editingTrack.expandedFeeling}
               originalPrompt={editingTrack.originalPrompt}
-              onClose={() => { setIsTuneOpen(false); setEditingTrack(null) }}
+              onClose={() => { 
+                setIsTuneOpen(false); 
+                setEditingTrack(null); 
+              }}
+              // Maps cleanly to your updated handleRegenerateArt function
               onRegenerate={handleRegenerateArt} 
             />
           )}
