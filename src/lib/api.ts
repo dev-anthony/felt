@@ -336,6 +336,44 @@ export const uploadApi = {
 
 // ─── Generations ──────────────────────────────────────────────────────────────
 
+// export const generationApi = {
+//   expand: (body: { upload_id: string; basic_input: string }) =>
+//     request<{ original: string; expanded: string }>('/api/generations/expand', {
+//       method: 'POST',
+//       body: JSON.stringify(body),
+//     }),
+
+//     refine: async (body: { upload_id: string; lyric_context: string; image_url?: string | null }) => {
+//     return request<{ generation_id: string; image_url: string }>("/generations/refine", {
+//       method: "PATCH",
+//       body: JSON.stringify(body),
+//     });
+//   },
+  
+//   transcribe: (body: { upload_id: string }) =>
+//     request<{ transcript: string; upload_id: string }>('/api/generations/transcribe', {
+//       method: 'POST',
+//       body: JSON.stringify(body),
+//     }),
+  
+//   generate: (body: {
+//     upload_id: string
+//     lyric_context: string
+//     genre?: string
+//   }) =>
+//     request<{
+//       generation_id: string
+//       image_url: string
+//     }>('/api/generations', {
+//       method: 'POST',
+//       body: JSON.stringify(body),
+//     }),
+  
+//   getByUpload: (uploadId: string) =>
+//     request<{ generations: Generation[] }>(`/api/generations/${uploadId}`, {
+//       method: 'GET'
+//     }),
+// }
 export const generationApi = {
   expand: (body: { upload_id: string; basic_input: string }) =>
     request<{ original: string; expanded: string }>('/api/generations/expand', {
@@ -343,8 +381,9 @@ export const generationApi = {
       body: JSON.stringify(body),
     }),
 
-    refine: async (body: { upload_id: string; lyric_context: string; image_url?: string | null }) => {
-    return request<{ generation_id: string; image_url: string }>("/generations/refine", {
+  // FIX: Added the missing /api prefix here
+  refine: async (body: { upload_id: string; lyric_context: string; image_url?: string | null }) => {
+    return request<{ generation_id: string; image_url: string }>("/api/generations/refine", {
       method: "PATCH",
       body: JSON.stringify(body),
     });
