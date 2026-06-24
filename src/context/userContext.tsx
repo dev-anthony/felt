@@ -7,7 +7,9 @@ import { useRouter, usePathname } from "next/navigation"
 interface UserContextType {
   user: User | null
   loading: boolean
+setUser: (user: User | null) => void
   refreshUser: () => Promise<void>
+
   logout: () => Promise<void>
 }
 
@@ -17,42 +19,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
   const router = useRouter()
-  const pathname = usePathname()
 
-  const refreshUser = React.useCallback(async () => {
-    try {
-      const data = await userApi.getMe()
-      setUser(data.user)
-    } catch (err) {
-      // Clear local reference if backend reports unauthenticated session state
-      setUser(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  // Boot once on mount — cookie is settled by this point
+  React.useEffect(() => {
+    userApi.getMe()
+      .then(data => setUser(data.user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false))
+  }, []) // ← empty deps, runs once only
 
   const logout = async () => {
-    try {
-      await authApi.logout()
-    } catch (err) {
-      console.error("Backend logout failed:", err)
-    } finally {
-      setUser(null)
-      router.push("/")
-    }
+    await authApi.logout()
+    setUser(null)
+    router.push("/")
   }
 
-  React.useEffect(() => {
-    // Only invoke lookup operations inside protected paths or at home
-    if (pathname.startsWith("/dashboard") || pathname === "/") {
-      refreshUser()
-    } else {
-      setLoading(false)
-    }
-  }, [pathname, refreshUser])
-
   return (
-    <UserContext.Provider value={{ user, loading, refreshUser, logout }}>
+    <UserContext.Provider value={{ user, loading, setUser, logout }}>
       {children}
     </UserContext.Provider>
   )

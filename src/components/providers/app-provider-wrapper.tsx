@@ -14,13 +14,19 @@ export function AuthProviderWrapper({ children }: { children: React.ReactNode })
       router.push("/");
     }
   };
-
+  const { setUser } = useUser()
   return (
     <>
       <div className={isAuthOpen ? "pointer-events-none blur-sm opacity-30 select-none transition-all duration-300" : ""}>
         {children}
       </div>
-      <AuthDialog open={isAuthOpen} onOpenChange={handleOpenChange} />
+      <AuthDialog 
+        open={isAuthOpen} 
+        onOpenChange={handleOpenChange}
+        onLoginSuccess={(user) => {
+          setUser(user) // ← user lands in state immediately, no re-fetch
+        }}
+      />
       <React.Suspense fallback={null}>
         <SearchParamsWatcher onAuthChange={setIsAuthOpen} />
       </React.Suspense>
