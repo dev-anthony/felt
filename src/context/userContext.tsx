@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { User, userApi, authApi } from "@/lib/api"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 
 interface UserContextType {
   user: User | null
@@ -13,23 +13,40 @@ interface UserContextType {
 
 const UserContext = React.createContext<UserContextType | undefined>(undefined)
 
+// Routes that require an authenticated user profile session context
+const PROTECTED_ROUTES = ["/dashboard", "/onboarding", "/settings", "/workspace"];
+
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const refreshUser = React.useCallback(async () => {
     try {
       const data = await userApi.getMe()
       setUser(data.user)
+      
+      // SCRUBBING GUARD: If authenticated successfully and a stale ?auth=true parameters remains, clear it out
+      if (searchParams.get("auth") === "true") {
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete("auth")
+        const query = params.toString()
+        router.replace(`${pathname}${query ? `?${query}` : ""}`)
+      }
     } catch (err) {
-      // Clear local reference if backend reports unauthenticated session state
       setUser(null)
+      
+      // PROTECTION GUARD: If user validation fails while on a private screen, bounce them back to landing page
+      const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route))
+      if (isProtected) {
+        router.push("/?auth=true")
+      }
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [pathname, searchParams, router])
 
   const logout = async () => {
     try {
@@ -43,8 +60,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   React.useEffect(() => {
-    // Only invoke lookup operations inside protected paths or at home
-    if (pathname.startsWith("/dashboard") || pathname === "/") {
+    // Only invoke lookup lookups inside protected paths or at home root
+    if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route)) || pathname === "/") {
       refreshUser()
     } else {
       setLoading(false)
