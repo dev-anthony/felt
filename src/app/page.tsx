@@ -1,17 +1,45 @@
-'use client';
-
 import Image from "next/image";
 import { Navigation } from "@/components/Navigation";
 
 export default function Index() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FELT",
+    "operatingSystem": "Web",
+    "applicationCategory": "MultimediaApplication",
+    "description": "An intelligent generative design ecosystem converting specific acoustic audio frequencies into production-ready cover art assets.",
+    "offers": {
+      "@type": "Offer",
+      "price": "2000",
+      "priceCurrency": "NGN",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "2000",
+        "priceCurrency": "NGN",
+        "referenceQuantity": {
+          "@type": "QuantitativeValue",
+          "value": "1",
+          "unitCode": "MON"
+        }
+      }
+    }
+  };
+
   return (
     <main className="bg-background text-foreground selection:bg-accent selection:text-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <Navigation />
+      
       <section className="relative min-h-screen flex flex-col items-center justify-center pt-24 px-6 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
             src="/hero-flowers.jpg"
-            alt="White flower-grass meeting an overcast sky"
+            alt="White flower-grass meeting an overcast sky - FELT Generative Backdrop Artwork"
             width={1920}
             height={1080}
             priority 
@@ -37,7 +65,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Captivating Aesthetic Summary Block */}
       <section id="summary" className="py-12 px-4 border-border text-center bg-foreground/[0.005]">
         <div className="max-w-3xl mx-auto space-y-4 reveal">
           <p className="font-display italic text-xl md:text-2xl tracking-tight leading-relaxed max-w-2xl mx-auto">
@@ -48,7 +75,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-24 px-6 border-t border-border">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16 reveal">
@@ -106,7 +132,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Subscription Pricing Section */}
       <section id="pricing" className="py-24 px-6 border-t border-border">
         <div className="max-w-sm mx-auto text-center border border-border p-10 bg-background">
           <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-accent block mb-3">The Pass</span>
@@ -127,7 +152,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Final CTA Section */}
       <section id="cta" className="py-24 px-6 border-t border-border text-center">
         <div className="max-w-3xl mx-auto space-y-8 reveal">
           <div className="font-display italic font-medium text-4xl md:text-6xl tracking-tighter text-balance max-w-2xl mx-auto leading-tight">
@@ -145,7 +169,16 @@ export default function Index() {
       </section>
 
       <footer className="py-16 px-6 border-t border-border flex flex-col items-center gap-6 text-center">
-        <div className="font-display italic text-2xl tracking-tight">FELT</div>
+        {/* Render branding logo asset in place of text */}
+        <div className="relative w-24 h-8 select-none">
+          <Image
+            src="/felt_logo_white.png"
+            alt="FELT Branding System Logo"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
         <div className="flex flex-wrap justify-center gap-6 font-mono text-[8px] tracking-[0.3em] uppercase text-muted-foreground/60">
           <span>Felt</span>
           <span className="flex items-center gap-1.5 normal-case tracking-normal text-[8px]">
