@@ -1,75 +1,6 @@
-// // src/app/layout.tsx
-// import type { Metadata } from "next";
-// import { Inter, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
-// import "./globals.css";
-
-// const inter = Inter({
-//   subsets: ["latin"],
-//   variable: "--font-sans",
-// });
-
-// const jetbrainsMono = JetBrains_Mono({
-//   subsets: ["latin"],
-//   variable: "--font-mono",
-// });
-
-// const cormorantGaramond = Cormorant_Garamond({
-//   subsets: ["latin"],
-//   style: ["italic"],
-//   weight: ["400", "500"],
-//   variable: "--font-display",
-// });
-
-// export const metadata: Metadata = {
-//   title: "FELT — Your music made visible",
-//   description: "FELT listens to the emotional DNA of your sound and translates it into photorealistic cover art.",
-//   openGraph: {
-//     title: "FELT — Your music made visible",
-//     description: "AI cover art that actually feels like the music it represents.",
-//   },
-// };
-
-// export default function RootLayout({
-//   children,
-// }: Readonly<{
-//   children: React.ReactNode;
-// }>) {
-//   return (
-//     <html lang="en">
-//       <body
-//         className={`${inter.variable} ${jetbrainsMono.variable} ${cormorantGaramond.variable} antialiased`}
-//       >
-//         {children}
-//       </body>
-//     </html>
-//   );
-// }
-// src/app/layout.tsx
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import { AuthProviderWrapper} from "@/components/providers/app-provider-wrapper";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  preload: false,
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  preload: false,
-});
-
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["400", "500"],
-  variable: "--font-display",
-  preload: false,
-  display: "swap",
-});
+import { AuthProviderWrapper } from "@/components/providers/app-provider-wrapper";
 
 export const metadata: Metadata = {
   title: "FELT — Your music made visible",
@@ -88,6 +19,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Preconnect to Google Font Servers */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Standard Google Font Package matching your precise weights and variants */}
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;700&display=swap" 
+          rel="stylesheet" 
+        />
+
         {/* NATIVE SEQUENCE PRELOADING: Guarantees zero race conditions on mount */}
         <script 
           src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js" 
@@ -102,9 +43,7 @@ export default function RootLayout({
           defer
         />
       </head>
-      <body
-        className={`${inter.variable} ${jetbrainsMono.variable} ${cormorantGaramond.variable} antialiased`}
-      >
+      <body className="antialiased">
         <AuthProviderWrapper>
           {children}
         </AuthProviderWrapper>

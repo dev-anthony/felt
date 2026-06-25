@@ -1,17 +1,75 @@
 "use client";
+// "use client";
+// // src/components/providers/auth-provider-wrapper.tsx
+
+// import * as React from "react";
+// import { useSearchParams, useRouter, usePathname } from "next/navigation";
+// import { AuthDialog } from "@/components/auth-dialog";
+
+// export function AuthProviderWrapper({ children }: { children: React.ReactNode }) {
+//   const searchParams = useSearchParams();
+//   const router = useRouter();
+//   const pathname = usePathname();
+  
+//   const [isAuthOpen, setIsAuthOpen] = React.useState(false);
+//   const triggerAuth = searchParams.get("auth") === "true";
+
+//   React.useEffect(() => {
+//     if (triggerAuth) {
+//       setIsAuthOpen(true);
+//     } else {
+//       setIsAuthOpen(false);
+//     }
+//   }, [triggerAuth]);
+
+//   const handleOpenChange = (open: boolean) => {
+//     setIsAuthOpen(open);
+    
+//     // If they cancel out of the modal manually while sitting on a protected route,
+//     // safely bounce them back to the landing page.
+//     if (!open && pathname !== "/") {
+//       router.push("/");
+//     }
+//   };
+
+//   return (
+//     <>
+//       <div className={triggerAuth ? "pointer-events-none blur-sm opacity-30 select-none transition-all duration-300" : ""}>
+//         {children}
+//       </div>
+
+//       <AuthDialog open={isAuthOpen} onOpenChange={handleOpenChange} />
+//     </>
+//   );
+// }
+// src/components/providers/auth-provider-wrapper.tsx
+
 import * as React from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { AuthDialog } from "@/components/auth-dialog";
-import { useUser } from "@/context/userContext";
 
-export function AuthProviderWrapper({ children }: { children: React.ReactNode }) {
+// 1. Create an inner component that safely reads useSearchParams
+function AuthProviderInner({ children }: { children: React.ReactNode }) {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { setUser } = useUser();
+  
   const [isAuthOpen, setIsAuthOpen] = React.useState(false);
+  const triggerAuth = searchParams.get("auth") === "true";
+
+  React.useEffect(() => {
+    if (triggerAuth) {
+      setIsAuthOpen(true);
+    } else {
+      setIsAuthOpen(false);
+    }
+  }, [triggerAuth]);
 
   const handleOpenChange = (open: boolean) => {
     setIsAuthOpen(open);
+    
+    // If they cancel out of the modal manually while sitting on a protected route,
+    // safely bounce them back to the landing page.
     if (!open && pathname !== "/") {
       router.push("/");
     }
@@ -19,31 +77,20 @@ export function AuthProviderWrapper({ children }: { children: React.ReactNode })
 
   return (
     <>
-      <div className={isAuthOpen ? "pointer-events-none blur-sm opacity-30 select-none transition-all duration-300" : ""}>
+      <div className={triggerAuth ? "pointer-events-none blur-sm opacity-30 select-none transition-all duration-300" : ""}>
         {children}
       </div>
-      <AuthDialog
-        open={isAuthOpen}
-        onOpenChange={handleOpenChange}
-        onLoginSuccess={(user) => {
-          setUser(user)
-          setIsAuthOpen(false)
-        }}
-      />
-      <React.Suspense fallback={null}>
-        <SearchParamsWatcher onAuthChange={setIsAuthOpen} />
-      </React.Suspense>
+
+      <AuthDialog open={isAuthOpen} onOpenChange={handleOpenChange} />
     </>
   );
 }
 
-function SearchParamsWatcher({ onAuthChange }: { onAuthChange: (open: boolean) => void }) {
-  const searchParams = useSearchParams();
-  const triggerAuth = searchParams.get("auth") === "true";
-
-  React.useEffect(() => {
-    onAuthChange(triggerAuth);
-  }, [triggerAuth]);
-
-  return null;
+// 2. Export the main wrapper wrapped in Suspense to satisfy the compiler
+export function AuthProviderWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <React.Suspense fallback={null}>
+      <AuthProviderInner>{children}</AuthProviderInner>
+    </React.Suspense>
+  );
 }
