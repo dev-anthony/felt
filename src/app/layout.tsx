@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   
   // Dynamic App Icon assignment
   icons: {
-    icon: "/favicon-512.png",
-    apple: "/favicon-512.png",
+    icon: "/favicon-32.png",
+    apple: "/favicon-32.png",
   },
   
   openGraph: {
@@ -22,9 +22,9 @@ export const metadata: Metadata = {
     siteName: "FELT",
     images: [
       {
-        url: "/favicon-512.png", 
-        width: 512,
-        height: 512,
+        url: "/felt_logo.png", 
+        width: 32,
+        height: 32,
         alt: "FELT — Audio to Generative Cover Art Workspace",
       },
     ],
