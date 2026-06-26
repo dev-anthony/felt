@@ -1,28 +1,22 @@
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
 
-// Tracker reference variables to manage global lifecycle states on the client side
+
 let refreshTimeoutId: any = null
 let isRefreshingPromise: Promise<boolean> | null = null
 
-/**
- * Predictive scheduler that runs background refresh dispatches 30–60 seconds 
- * before token decay parameters hit.
- */
 export function scheduleTokenRefresh(expiresAtInSeconds: number) {
   if (refreshTimeoutId) clearTimeout(refreshTimeoutId)
 
   const currentTime = Math.floor(Date.now() / 1000)
   const timeUntilExpiration = expiresAtInSeconds - currentTime
 
-  // Set a safe 45-second operational buffer window before decay limits
+
   const refreshBuffer = 45 
   const delayInSeconds = timeUntilExpiration - refreshBuffer
-
-  // If the session is already inside the buffer, dispatch immediately. Otherwise, mount the countdown timer.
   const delayInMilliseconds = Math.max(delayInSeconds, 0) * 1000
 
-  console.log(`[FELT Auth] Predictive background token refresh scheduled in ${Math.max(delayInSeconds, 0)}s`)
+  // console.log(`[FELT Auth] Predictive background token refresh scheduled in ${Math.max(delayInSeconds, 0)}s`)
 
   refreshTimeoutId = setTimeout(async () => {
     try {
@@ -38,10 +32,6 @@ export function scheduleTokenRefresh(expiresAtInSeconds: number) {
   }, delayInMilliseconds)
 }
 
-/**
- * Triggers structural layout cleanup and forces navigation to the landing screen
- * without breaking client UI components with uncaught 401 response models.
- */
 export async function handleGracefulFailoverLogout() {
   if (refreshTimeoutId) {
     clearTimeout(refreshTimeoutId)
@@ -49,19 +39,15 @@ export async function handleGracefulFailoverLogout() {
   }
 
   try {
-    // Hits our updated backend sign-out layer which guarantees a safe 200 response
     await fetch(`${BASE_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' })
   } catch (err) {
-    console.error("[FELT Auth] Best-effort logout cleanup failed to resolve network handshake:", err)
+    // console.error("[FELT Auth] Best-effort logout cleanup failed to resolve network handshake:", err)
   } finally {
-    // Evict user back to landing view
     if (typeof window !== 'undefined') {
       window.location.href = '/'
     }
   }
 }
-
-// ─── Base fetch wrapper ───────────────────────────────────────────────────────
 
 const request = async <T>(
   path: string,
@@ -69,19 +55,17 @@ const request = async <T>(
 ): Promise<T> => {
   let res = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    credentials: 'include', // Mandates that the browser sends along your HTTP-Only cookies
+    credentials: 'include', 
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {}),
     },
   })
 
-  // Intercept expired sessions on protected endpoints
   if (res.status === 401 && path !== '/api/auth/login' && path !== '/api/auth/signup' && path !== '/api/auth/refresh') {
     console.warn(`[FELT Network] Intercepted 401 on protected endpoint [${path}]. Attempting reactive recovery...`)
     
     try {
-      // Deduplicate overlapping refresh requests using a shared promise block
       if (!isRefreshingPromise) {
         isRefreshingPromise = (async () => {
           const refreshRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
@@ -101,11 +85,10 @@ const request = async <T>(
       }
 
       const refreshSuccessful = await isRefreshingPromise
-      isRefreshingPromise = null // Clear memory reference immediately on resolution
+      isRefreshingPromise = null 
 
       if (refreshSuccessful) {
-        console.log(`[FELT Network] silents session recovery successful. Re-executing: ${path}`)
-        // 2. Token successfully rotated! Re-execute the original network request
+        // console.log(`[FELT Network] silents session recovery successful. Re-executing: ${path}`)
         res = await fetch(`${BASE_URL}${path}`, {
           ...options,
           credentials: 'include',
@@ -115,7 +98,7 @@ const request = async <T>(
           },
         })
       } else {
-        console.error("[FELT Network] Reactive token rotation verification rejected. Evicting user session.")
+        // console.error("[FELT Network] Reactive token rotation verification rejected. Evicting user session.")
         handleGracefulFailoverLogout()
         throw new Error('Session validation failed. Re-authenticating.')
       }
@@ -127,10 +110,8 @@ const request = async <T>(
     }
   }
 
-  // Handle file binary data streaming lookups manually for onboarding wrappers
   if (path.includes('/api/onboarding/upload-avatar') || path.includes('/api/uploads')) {
     if (options.method === 'POST' && options.body instanceof FormData) {
-       // Return early since the explicit avatar and track functions handle their own res.json parsing blocks
        return {} as T
     }
   }
@@ -144,8 +125,7 @@ const request = async <T>(
   return data as T
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
+// ─── Types 
 export interface User {
   id: string
   email: string
@@ -189,10 +169,10 @@ export interface UploadRecord {
     speechiness: number | null
     genre: string
   }
-  generations?: Generation[] // 👈 Clean layout matching single image data arrays
+  generations?: Generation[]
 }
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
+//Auth
 
 export const authApi = {
   signup: (body: { email: string; password: string; name: string }) =>
@@ -248,7 +228,7 @@ export const authApi = {
   },
 }
 
-// ─── Onboarding ───────────────────────────────────────────────────────────────
+// ─── Onboarding
 
 export const onboardingApi = {
   uploadAvatar: async (file: File): Promise<{ avatarUrl: string }> => {
@@ -283,7 +263,7 @@ export const onboardingApi = {
     }),
 }
 
-// ─── User Profile ─────────────────────────────────────────────────────────────
+//User Profile
 
 export const userApi = {
   getMe: () => request<{ user: User }>('/api/user/me', { method: 'GET' }),
@@ -295,8 +275,44 @@ export const userApi = {
     }),
 }
 
-// ─── Uploads ─────────────────────────────────────────────────────────────────
+//Upload
 
+// export const uploadApi = {
+//   uploadTrack: async (file: File, title: string, sentencePrompt: string, trackType: 'vocal' | 'instrumental') => {
+//     const formData = new FormData()
+//     formData.append('audio', file)
+//     formData.append('title', title)
+//     formData.append('sentence_prompt', sentencePrompt)
+//     formData.append('track_type', trackType)
+
+//     const res = await fetch(`${BASE_URL}/api/uploads`, {
+//       method: 'POST',
+//       credentials: 'include',
+//       body: formData,
+//     })
+
+//     const data = await res.json()
+//     if (!res.ok) {
+//       if (res.status === 401) {
+//         handleGracefulFailoverLogout()
+//       }
+//       throw new Error(data.error || 'Track processing failed')
+//     }
+//     return data as { track: UploadRecord; pipeline_hint: 'TRANSCRIBE' | 'FEELING_EXPANDER' }
+//   },
+
+//   submitAnalysis: (trackId: string, features: any) =>
+//     request<{ track: UploadRecord; pipeline_hint: 'TRANSCRIBE' | 'FEELING_EXPANDER' }>(`/api/uploads/${trackId}/analysis`, {
+//       method: 'POST',
+//       body: JSON.stringify(features),
+//     }),
+
+//   getUploads: (limit = 20, offset = 0) =>
+//     request<{ uploads: UploadRecord[]; total: number; limit: number; offset: number }>(
+//       `/api/uploads?limit=${limit}&offset=${offset}`,
+//       { method: 'GET' }
+//     ),
+// }
 export const uploadApi = {
   uploadTrack: async (file: File, title: string, sentencePrompt: string, trackType: 'vocal' | 'instrumental') => {
     const formData = new FormData()
@@ -332,48 +348,13 @@ export const uploadApi = {
       `/api/uploads?limit=${limit}&offset=${offset}`,
       { method: 'GET' }
     ),
+
+  deleteTrack: (trackId: string) =>
+    request<{ message: string }>(`/api/uploads/${trackId}`, {
+      method: 'DELETE',
+    }),
 }
 
-// ─── Generations ──────────────────────────────────────────────────────────────
-
-// export const generationApi = {
-//   expand: (body: { upload_id: string; basic_input: string }) =>
-//     request<{ original: string; expanded: string }>('/api/generations/expand', {
-//       method: 'POST',
-//       body: JSON.stringify(body),
-//     }),
-
-//     refine: async (body: { upload_id: string; lyric_context: string; image_url?: string | null }) => {
-//     return request<{ generation_id: string; image_url: string }>("/generations/refine", {
-//       method: "PATCH",
-//       body: JSON.stringify(body),
-//     });
-//   },
-  
-//   transcribe: (body: { upload_id: string }) =>
-//     request<{ transcript: string; upload_id: string }>('/api/generations/transcribe', {
-//       method: 'POST',
-//       body: JSON.stringify(body),
-//     }),
-  
-//   generate: (body: {
-//     upload_id: string
-//     lyric_context: string
-//     genre?: string
-//   }) =>
-//     request<{
-//       generation_id: string
-//       image_url: string
-//     }>('/api/generations', {
-//       method: 'POST',
-//       body: JSON.stringify(body),
-//     }),
-  
-//   getByUpload: (uploadId: string) =>
-//     request<{ generations: Generation[] }>(`/api/generations/${uploadId}`, {
-//       method: 'GET'
-//     }),
-// }
 export const generationApi = {
   expand: (body: { upload_id: string; basic_input: string }) =>
     request<{ original: string; expanded: string }>('/api/generations/expand', {
@@ -381,7 +362,6 @@ export const generationApi = {
       body: JSON.stringify(body),
     }),
 
-  // FIX: Added the missing /api prefix here
   refine: async (body: { upload_id: string; lyric_context: string; image_url?: string | null }) => {
     return request<{ generation_id: string; image_url: string }>("/api/generations/refine", {
       method: "PATCH",
