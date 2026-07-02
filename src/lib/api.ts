@@ -1,5 +1,5 @@
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+const BASE_URL = ['http://localhost:4000']
 
 
 let refreshTimeoutId: any = null
@@ -342,6 +342,19 @@ export const uploadApi = {
       method: 'POST',
       body: JSON.stringify(features),
     }),
+transcribeTrack: (uploadId: string, artistName?: string) =>
+  request<{
+    transcript: string
+    expanded: string
+    upload_id: string
+    source?: 'genius' | 'deepgram' | 'none'
+    matched?: { title: string; artist: string }
+    warning?: string
+  }>(`/api/generations/transcribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ upload_id: uploadId, artist_name: artistName }),
+  }),
 
   getUploads: (limit = 20, offset = 0) =>
     request<{ uploads: UploadRecord[]; total: number; limit: number; offset: number }>(

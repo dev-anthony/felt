@@ -397,7 +397,7 @@ export default function DashboardPage() {
               type="button"
               disabled={deletingTrackId !== null}
               onClick={executeTrackPurge}
-              className="rounded-none bg-red-600 hover:bg-red-700 text-white font-mono text-[9px] uppercase tracking-widest h-10 w-full sm:w-32 flex items-center justify-center gap-1.5"
+              className="rounded-none bg-red-500 hover:bg-red-600 text-white font-mono text-[9px] uppercase tracking-widest h-10 w-full sm:w-32 flex items-center justify-center gap-1.5"
             >
               {deletingTrackId !== null ? (
                 <>
