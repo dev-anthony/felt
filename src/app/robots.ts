@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/onboarding/', '/profile/', '/gallery/'], // Blocks crawlers from tracking user app workflows
     },
-    sitemap: 'https://felt-rouge-six.vercel.app/sitemap.xml',
+    sitemap: 'https://www.usefelt.online/sitemap.xml',
   };
 }

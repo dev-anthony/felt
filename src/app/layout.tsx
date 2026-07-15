@@ -7,22 +7,26 @@ export const metadata: Metadata = {
   description: "FELT analyzes the emotional DNA of your audio tracks and translates acoustic characteristics into photorealistic, high-resolution custom cover art.",
   keywords: ["AI cover art", "music technology", "album art generator", "music production tools", "visualize audio", "Nigeria music tech"],
   authors: [{ name: "Music Tech & Arts" }],
-  metadataBase: new URL("https://felt-rouge-six.vercel.app"),
-  
+  metadataBase: new URL("https://www.usefelt.online"),
+
   // Dynamic App Icon assignment
   icons: {
     icon: "/favicon-32.png",
     apple: "/favicon-32.png",
   },
-  
+
+  alternates: {
+    canonical: "https://www.usefelt.online",
+  },
+
   openGraph: {
     title: "FELT — Your Music Made Visible",
     description: "AI cover art that actually feels like the music it represents.",
-    url: "https://felt-rouge-six.vercel.app",
+    url: "https://www.usefelt.online",
     siteName: "FELT",
     images: [
       {
-        url: "/felt_logo.png", 
+        url: "/felt_logo.png",
         width: 32,
         height: 32,
         alt: "FELT — Audio to Generative Cover Art Workspace",
@@ -31,9 +35,12 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
-  
+
   twitter: {
     card: "summary",
+    title: "FELT — Your Music Made Visible",
+    description: "AI cover art that actually feels like the music it represents.",
+    images: ["/felt_logo.png"],
   },
 
   robots: {
