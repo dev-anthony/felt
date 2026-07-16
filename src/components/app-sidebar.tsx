@@ -64,11 +64,12 @@ export function AppSidebar() {
       <SidebarHeader className="h-20 flex flex-row items-center justify-between px-4 border-b border-border/40 bg-[#080808]">
         {state === "expanded" && (
           <div className="flex flex-col reveal min-w-0">
+            {/* h-6 ≈ the old `text-2xl` (24px) text logo this replaced. */}
             <Image
-              src="/felt_logo_white-removebg-preview.png"
+              src="/felt_logo.png"
               alt="FELT"
-              width={80}
-              height={26}
+              width={96}
+              height={39}
               priority
               className="h-6 w-auto select-none"
             />

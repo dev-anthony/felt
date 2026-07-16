@@ -171,16 +171,16 @@ export default function Index() {
       </section>
 
       <footer className="py-16 px-6 border-t border-border flex flex-col items-center gap-6 text-center">
-        {/* Render branding logo asset in place of text */}
-        <div className="relative w-24 h-8 select-none">
-          <Image
-            src="/felt_logo_white.png"
-            alt="FELT Branding System Logo"
-            fill
-            className="object-contain"
-            priority
-          />
-        </div>
+        {/* Render branding logo asset in place of text. Uses the cropped 540x220
+            wordmark — felt_logo_white.png is an 800x800 square whose padding made
+            the glyph render tiny inside a fixed box. */}
+        <Image
+          src="/felt_logo.png"
+          alt="FELT"
+          width={120}
+          height={49}
+          className="h-8 w-auto select-none"
+        />
         <div className="flex flex-wrap justify-center gap-6 font-mono text-[8px] tracking-[0.3em] uppercase text-muted-foreground/60">
           <span>Felt</span>
           <span className="flex items-center gap-1.5 normal-case tracking-normal text-[8px]">

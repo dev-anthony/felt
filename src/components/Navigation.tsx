@@ -5,24 +5,32 @@ import Image from "next/image";
 import Link from "next/link";
 import { useNavStore } from "@/store/useNavStore";
 import { AuthDialog } from "@/components/auth-dialog";
-import { useUser } from "@/context/userContext";
+import { authApi, handleGracefulFailoverLogout } from "@/lib/api";
 import { Archive, Home, Sparkles, Layers, Ticket, ArrowUpRight, LayoutDashboard, LogOut } from "lucide-react";
 
 export function Navigation() {
   const { context, setContext } = useNavStore();
-  const { logout } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
   const toggleNav = () => setIsOpen(!isOpen);
   const handleLinkClick = () => setIsOpen(false);
 
-  // Real sign-out: hits the backend, clears the session cookies and routes home.
+  // Real sign-out: hits the backend, clears the refresh timer and routes home.
   // (This used to only flip local nav state, so the user stayed logged in.)
+  //
+  // Deliberately uses authApi directly rather than useUser(): this component
+  // renders on the landing page, which sits OUTSIDE UserProvider (that provider
+  // only wraps /dashboard). Calling useUser() here throws at runtime.
   const handleLogout = async () => {
     setIsOpen(false);
     setContext('landing');
-    await logout();
+    try {
+      await authApi.logout();
+    } catch {
+      // Still clear local session state and get the user home.
+      handleGracefulFailoverLogout();
+    }
   };
 
   const linkClass = "text-foreground hover:text-accent transition-colors p-3 rounded-lg hover:bg-foreground/10 flex items-center justify-center";
@@ -32,13 +40,17 @@ export function Navigation() {
       {/* Desktop Navigation */}
       <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-10 py-7 mix-blend-difference">
         <Link href="/" aria-label="FELT home" className="flex items-center shrink-0">
+          {/* felt_logo.png is the cropped 540x220 wordmark. The *_white*.png files
+              are 500x500/800x800 squares with the wordmark floating in transparent
+              padding, so any height applied to them shrinks the glyph to nothing.
+              h-8 ≈ the old `text-3xl` (30px) text logo it replaced. */}
           <Image
-            src="/felt_logo_white-removebg-preview.png"
+            src="/felt_logo.png"
             alt="FELT"
-            width={96}
-            height={32}
+            width={120}
+            height={49}
             priority
-            className="h-7 w-auto md:h-8 select-none"
+            className="h-8 w-auto select-none"
           />
         </Link>
         <div className="hidden md:flex gap-12 text-[11px] font-mono tracking-[0.25em] uppercase items-center">
