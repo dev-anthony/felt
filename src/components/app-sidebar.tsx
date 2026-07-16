@@ -2,6 +2,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { 
   LayoutDashboard, 
@@ -62,12 +63,17 @@ export function AppSidebar() {
       {/* Brand Header Section */}
       <SidebarHeader className="h-20 flex flex-row items-center justify-between px-4 border-b border-border/40 bg-[#080808]">
         {state === "expanded" && (
-          <div className="flex flex-col reveal">
-            <span className="font-display italic text-2xl tracking-tight select-none">
-              FELT
-            </span>
+          <div className="flex flex-col reveal min-w-0">
+            <Image
+              src="/felt_logo_white-removebg-preview.png"
+              alt="FELT"
+              width={80}
+              height={26}
+              priority
+              className="h-6 w-auto select-none"
+            />
             {user?.email && (
-              <span className="font-mono text-[8px] text-muted-foreground max-w-[140px] truncate mt-0.5">
+              <span className="font-mono text-[8px] text-muted-foreground max-w-[140px] truncate mt-1">
                 {user.email}
               </span>
             )}

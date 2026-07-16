@@ -8,11 +8,10 @@ import { generationApi } from "@/lib/api"
 interface ArtGenerationViewProps {
   uploadId: string
   lyricContext: string
-  genre?: string
   onComplete: (imageUrl: string) => void
 }
 
-export function ArtGenerationView({ uploadId, lyricContext, genre, onComplete }: ArtGenerationViewProps) {
+export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGenerationViewProps) {
   const [status, setStatus] = React.useState<"idle" | "generating" | "success" | "error">("idle")
   const [generatedImageUrl, setGeneratedImageUrl] = React.useState<string | null>(null)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
@@ -25,10 +24,11 @@ export function ArtGenerationView({ uploadId, lyricContext, genre, onComplete }:
     setErrorMessage(null)
 
     try {
+      // The backend reuses the technique it already matched and stored during
+      // /expand or /transcribe, so only the scene context is sent here.
       const response = await generationApi.generate({
         upload_id: uploadId,
         lyric_context: lyricContext,
-        genre: genre
       })
 
       if (response && response.image_url) {
@@ -42,7 +42,7 @@ export function ArtGenerationView({ uploadId, lyricContext, genre, onComplete }:
       setErrorMessage(err?.message || "Failed to finalize sync rendering pipeline.")
       setStatus("error")
     }
-  }, [uploadId, lyricContext, genre])
+  }, [uploadId, lyricContext])
 
   // Single invocation mount lifecycle check
   React.useEffect(() => {
@@ -71,7 +71,7 @@ export function ArtGenerationView({ uploadId, lyricContext, genre, onComplete }:
               Flux Model Rendering Image...
             </h4>
             <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider leading-relaxed">
-              Synthesizing sonic metrics and {genre || 'unclassified'} variables into custom canvas structures
+              Synthesizing sonic metrics into custom canvas structures
             </p>
           </div>
 

@@ -1,22 +1,28 @@
 'use client';
 
 import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useNavStore } from "@/store/useNavStore";
 import { AuthDialog } from "@/components/auth-dialog";
+import { useUser } from "@/context/userContext";
 import { Archive, Home, Sparkles, Layers, Ticket, ArrowUpRight, LayoutDashboard, LogOut } from "lucide-react";
 
 export function Navigation() {
   const { context, setContext } = useNavStore();
+  const { logout } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
   const toggleNav = () => setIsOpen(!isOpen);
   const handleLinkClick = () => setIsOpen(false);
 
-  // Mock function: Connect this to your auth hook / route pusher
-  const handleLogout = () => {
+  // Real sign-out: hits the backend, clears the session cookies and routes home.
+  // (This used to only flip local nav state, so the user stayed logged in.)
+  const handleLogout = async () => {
     setIsOpen(false);
     setContext('landing');
+    await logout();
   };
 
   const linkClass = "text-foreground hover:text-accent transition-colors p-3 rounded-lg hover:bg-foreground/10 flex items-center justify-center";
@@ -25,7 +31,16 @@ export function Navigation() {
     <>
       {/* Desktop Navigation */}
       <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-10 py-7 mix-blend-difference">
-        <div className="font-display italic text-3xl tracking-tight">FELT</div>
+        <Link href="/" aria-label="FELT home" className="flex items-center shrink-0">
+          <Image
+            src="/felt_logo_white-removebg-preview.png"
+            alt="FELT"
+            width={96}
+            height={32}
+            priority
+            className="h-7 w-auto md:h-8 select-none"
+          />
+        </Link>
         <div className="hidden md:flex gap-12 text-[11px] font-mono tracking-[0.25em] uppercase items-center">
           {context === 'landing' ? (
             <>
@@ -41,7 +56,7 @@ export function Navigation() {
           ) : (
             <>
               <a href="/dashboard" className="hover:text-accent transition-colors">Overview</a>
-              <a href="/dashboard/archive" className="hover:text-accent transition-colors">My Art</a>
+              <a href="/dashboard/gallery" className="hover:text-accent transition-colors">My Art</a>
               <button 
                 onClick={handleLogout}
                 className="px-4 py-2 border border-border rounded-full font-mono text-[12px] tracking-[0.2em] uppercase hover:bg-destructive hover:text-white transition-colors cursor-pointer"
@@ -102,7 +117,7 @@ export function Navigation() {
                 <a href="/dashboard" onClick={handleLinkClick} className={linkClass} title="Dashboard Home">
                   <LayoutDashboard className="w-5 h-5"/>
                 </a>
-                <a href="/dashboard/archive" onClick={handleLinkClick} className={linkClass} title="Archive">
+                <a href="/dashboard/gallery" onClick={handleLinkClick} className={linkClass} title="Archive">
                   <Archive className="w-5 h-5"/>
                 </a>
                 <button 

@@ -2,7 +2,7 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 
-let refreshTimeoutId: any = null
+let refreshTimeoutId: ReturnType<typeof setTimeout> | null = null
 let isRefreshingPromise: Promise<boolean> | null = null
 
 export function scheduleTokenRefresh(expiresAtInSeconds: number) {
@@ -40,8 +40,8 @@ export async function handleGracefulFailoverLogout() {
 
   try {
     await fetch(`${BASE_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' })
-  } catch (err) {
-    // console.error("[FELT Auth] Best-effort logout cleanup failed to resolve network handshake:", err)
+  } catch {
+    // Best-effort cleanup: the cookie is cleared client-side regardless.
   } finally {
     if (typeof window !== 'undefined') {
       window.location.href = '/'
@@ -119,13 +119,22 @@ const request = async <T>(
   const data = await res.json()
 
   if (!res.ok) {
-    throw new Error(data.error || 'Something went wrong')
+    // The backend returns a human-readable `detail` for provider failures
+    // (e.g. 402 "Image provider credits exhausted"). Surface it when present so
+    // the UI can tell the user what actually happened instead of a generic error.
+    throw new Error(data.detail || data.error || 'Something went wrong')
   }
 
   return data as T
 }
 
 // ─── Types 
+/** An option served by GET /api/onboarding/options — never hardcode these. */
+export interface ProfileOption {
+  id: string
+  label: string
+}
+
 export interface User {
   id: string
   email: string
@@ -133,9 +142,25 @@ export interface User {
   avatar_url: string | null
   sound_words: string[]
   city: string | null
-  default_aesthetic_id: string | null
+  /** Artist's declared lane — corrects Essentia's culture-blind genre guess. */
+  default_genre: string | null
+  /** 'auto' | 'figure' | 'no_people' — whether a person appears on covers. */
+  default_subject_mode: string | null
   onboarding_complete: boolean
 }
+
+/** One of the 10 storytelling techniques the backend matches to a track. */
+export type Technique =
+  | 'FLASH_DOCUMENTARY'
+  | 'VINTAGE_FILM_NOSTALGIA'
+  | 'SILHOUETTE_ATMOSPHERE'
+  | 'SURREAL_PRACTICAL_METAPHOR'
+  | 'DUOTONE_COLOR_WASH'
+  | 'MACRO_INTIMATE_DETAIL'
+  | 'MOTION_BLUR_STROBE'
+  | 'MIRROR_DOUBLE_EXPOSURE'
+  | 'STUDIO_SEAMLESS_EDITORIAL'
+  | 'MONUMENTAL_SCALE_ISOLATION'
 
 export interface Generation {
   id: string
@@ -143,8 +168,26 @@ export interface Generation {
   user_id: string
   prompt_used: string
   image_url: string
+  /** Persisted by the backend on every generation — surfaced in the gallery. */
+  technique?: Technique
   status: 'complete' | 'generating' | 'failed'
   created_at: string
+}
+
+/** The Essentia-derived feature payload the client extracts and the backend stores. */
+export interface AudioFeatures {
+  bpm: number
+  key: string
+  scale: string
+  energy: number
+  valence: number
+  danceability: number
+  acousticness: number
+  spectral_brightness: number
+  loudness: number
+  mood: string
+  speechiness: number | null
+  genre: string
 }
 
 export interface UploadRecord {
@@ -155,20 +198,7 @@ export interface UploadRecord {
   audio_url: string
   sentence_prompt: string
   created_at: string
-  audio_features?: {
-    bpm: number
-    key: string
-    scale: string
-    energy: number
-    valence: number
-    danceability: number
-    acousticness: number
-    spectral_brightness: number
-    loudness: number
-    mood: 'happy' | 'sad' | 'aggressive' | 'relaxed'
-    speechiness: number | null
-    genre: string
-  }
+  audio_features?: AudioFeatures
   generations?: Generation[]
 }
 
@@ -251,10 +281,17 @@ export const onboardingApi = {
     return data
   },
 
+  /** Genre + subject-mode choices, served by the backend so the UI can't drift. */
+  getOptions: () =>
+    request<{ genres: ProfileOption[]; subjectModes: ProfileOption[] }>('/api/onboarding/options', {
+      method: 'GET',
+    }),
+
   complete: (body: {
     soundWords: string[]
     city: string
-    defaultAestheticId: string
+    genre: string
+    subjectMode: string
     avatarUrl: string | null
   }) =>
     request<{ user: User }>('/api/onboarding/complete', {
@@ -268,7 +305,7 @@ export const onboardingApi = {
 export const userApi = {
   getMe: () => request<{ user: User }>('/api/user/me', { method: 'GET' }),
 
-  updateMe: (body: Partial<Pick<User, 'name' | 'sound_words' | 'city' | 'default_aesthetic_id' | 'avatar_url'>>) =>
+  updateMe: (body: Partial<Pick<User, 'name' | 'sound_words' | 'city' | 'default_genre' | 'default_subject_mode' | 'avatar_url'>>) =>
     request<{ user: User }>('/api/user/me', {
       method: 'PATCH',
       body: JSON.stringify(body),
@@ -277,42 +314,6 @@ export const userApi = {
 
 //Upload
 
-// export const uploadApi = {
-//   uploadTrack: async (file: File, title: string, sentencePrompt: string, trackType: 'vocal' | 'instrumental') => {
-//     const formData = new FormData()
-//     formData.append('audio', file)
-//     formData.append('title', title)
-//     formData.append('sentence_prompt', sentencePrompt)
-//     formData.append('track_type', trackType)
-
-//     const res = await fetch(`${BASE_URL}/api/uploads`, {
-//       method: 'POST',
-//       credentials: 'include',
-//       body: formData,
-//     })
-
-//     const data = await res.json()
-//     if (!res.ok) {
-//       if (res.status === 401) {
-//         handleGracefulFailoverLogout()
-//       }
-//       throw new Error(data.error || 'Track processing failed')
-//     }
-//     return data as { track: UploadRecord; pipeline_hint: 'TRANSCRIBE' | 'FEELING_EXPANDER' }
-//   },
-
-//   submitAnalysis: (trackId: string, features: any) =>
-//     request<{ track: UploadRecord; pipeline_hint: 'TRANSCRIBE' | 'FEELING_EXPANDER' }>(`/api/uploads/${trackId}/analysis`, {
-//       method: 'POST',
-//       body: JSON.stringify(features),
-//     }),
-
-//   getUploads: (limit = 20, offset = 0) =>
-//     request<{ uploads: UploadRecord[]; total: number; limit: number; offset: number }>(
-//       `/api/uploads?limit=${limit}&offset=${offset}`,
-//       { method: 'GET' }
-//     ),
-// }
 export const uploadApi = {
   uploadTrack: async (file: File, title: string, sentencePrompt: string, trackType: 'vocal' | 'instrumental') => {
     const formData = new FormData()
@@ -337,24 +338,23 @@ export const uploadApi = {
     return data as { track: UploadRecord; pipeline_hint: 'TRANSCRIBE' | 'FEELING_EXPANDER' }
   },
 
-  submitAnalysis: (trackId: string, features: any) =>
+  submitAnalysis: (trackId: string, features: AudioFeatures) =>
     request<{ track: UploadRecord; pipeline_hint: 'TRANSCRIBE' | 'FEELING_EXPANDER' }>(`/api/uploads/${trackId}/analysis`, {
       method: 'POST',
       body: JSON.stringify(features),
     }),
-transcribeTrack: (uploadId: string, artistName?: string) =>
-  request<{
-    transcript: string
-    expanded: string
-    upload_id: string
-    source?: 'genius' | 'deepgram' | 'none'
-    matched?: { title: string; artist: string }
-    warning?: string
-  }>(`/api/generations/transcribe`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ upload_id: uploadId, artist_name: artistName }),
-  }),
+  transcribeTrack: (uploadId: string, artistName?: string) =>
+    request<{
+      transcript: string
+      expanded: string
+      technique: Technique
+      upload_id: string
+      source?: 'genius' | 'deepgram' | 'none'
+      matched?: { title: string; artist: string }
+    }>(`/api/generations/transcribe`, {
+      method: 'POST',
+      body: JSON.stringify({ upload_id: uploadId, artist_name: artistName }),
+    }),
 
   getUploads: (limit = 20, offset = 0) =>
     request<{ uploads: UploadRecord[]; total: number; limit: number; offset: number }>(
@@ -370,37 +370,33 @@ transcribeTrack: (uploadId: string, artistName?: string) =>
 
 export const generationApi = {
   expand: (body: { upload_id: string; basic_input: string }) =>
-    request<{ original: string; expanded: string }>('/api/generations/expand', {
+    request<{ original: string; expanded: string; technique: Technique }>('/api/generations/expand', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
 
-  refine: async (body: { upload_id: string; lyric_context: string; image_url?: string | null }) => {
-    return request<{ generation_id: string; image_url: string }>("/api/generations/refine", {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    });
-  },
-  
-  transcribe: (body: { upload_id: string }) =>
-    request<{ transcript: string; upload_id: string }>('/api/generations/transcribe', {
-      method: 'POST',
+  refine: (body: { upload_id: string; lyric_context: string; image_url?: string | null }) =>
+    request<{ generation_id: string; image_url: string; technique: Technique }>('/api/generations/refine', {
+      method: 'PATCH',
       body: JSON.stringify(body),
     }),
-  
+
+  // `technique` is optional: when omitted the backend reuses the technique it
+  // already matched and stored during /expand or /transcribe.
   generate: (body: {
     upload_id: string
-    lyric_context: string
-    genre?: string
+    lyric_context?: string
+    technique?: Technique
   }) =>
     request<{
       generation_id: string
       image_url: string
+      technique: Technique
     }>('/api/generations', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
-  
+
   getByUpload: (uploadId: string) =>
     request<{ generations: Generation[] }>(`/api/generations/${uploadId}`, {
       method: 'GET'

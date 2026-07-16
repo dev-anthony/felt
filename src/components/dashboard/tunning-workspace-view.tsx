@@ -57,7 +57,7 @@ export function TuningWorkspaceView({
         
         finalDescription = expandData.expanded
         setLiveExpandedFeeling(finalDescription)
-      } catch (expandErr: any) {
+      } catch (expandErr: unknown) {
         console.warn("Expansion framework busy. Activating fallback parameters.", expandErr)
         setLiveExpandedFeeling("Aesthetic Expansion Layer busy. Flux will fallback directly to your raw blueprint.")
         finalDescription = ""
@@ -66,9 +66,9 @@ export function TuningWorkspaceView({
       setStatusMessage("Reflushing Flux Engine...")
       await onRegenerate(uploadId, editedPrompt.trim(), finalDescription || undefined)
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Regeneration failure:", err)
-      setStatusMessage(err.message || "Sequence broken.")
+      setStatusMessage(err instanceof Error ? err.message : "Sequence broken.")
     } finally {
       setIsProcessing(false)
     }
@@ -180,7 +180,7 @@ export function TuningWorkspaceView({
             variant="ghost"
             disabled={isProcessing}
             onClick={handleCancelClick}
-            className="w-full sm:w-auto font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4 disabled:opacity-20 hover:bg-red-950/20 hover:text-red-400 text-neutral-400 transition-colors order-3 sm:order-1"
+            className="w-full sm:w-auto shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4 disabled:opacity-20 hover:bg-red-950/20 hover:text-red-400 text-neutral-400 transition-colors order-3 sm:order-1"
           >
             Cancel Changes
           </Button>
@@ -191,19 +191,21 @@ export function TuningWorkspaceView({
               type="button"
               disabled={isProcessing || !editedPrompt.trim()}
               onClick={handleRegenerateClick}
-              className="w-full sm:w-auto font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4 bg-transparent border border-border/80 text-foreground hover:bg-neutral-900 flex items-center justify-center gap-2 box-border"
+              className="w-full sm:w-auto shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4 bg-transparent border border-border/80 text-foreground hover:bg-neutral-900 flex items-center justify-center gap-2 box-border"
             >
-              <RefreshCw className={`size-3 ${isProcessing ? "animate-spin" : ""}`} /> 
-              {isProcessing ? "Tuning Layout..." : "Regenerate"}
+              <RefreshCw className={`size-3 shrink-0 ${isProcessing ? "animate-spin" : ""}`} />
+              {/* Fixed min-width stops the row reflowing when the label swaps to
+                  the longer "Tuning Layout…" and squeezes the sibling button. */}
+              <span className="sm:min-w-[6.5rem]">{isProcessing ? "Tuning Layout..." : "Regenerate"}</span>
             </Button>
 
             <Button
               type="button"
               disabled={isProcessing || (!hasGeneratedNewArt && editedPrompt === originalPrompt)}
               onClick={handleAcceptClick}
-              className="w-full sm:w-auto font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-5 bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center gap-2 disabled:opacity-40 box-border"
+              className="w-full sm:w-auto shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-5 bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center gap-2 disabled:opacity-40 box-border"
             >
-              <Check className="size-3.5 stroke-[2.5px]" />
+              <Check className="size-3.5 stroke-[2.5px] shrink-0" />
               Keep Artwork
             </Button>
           </div>

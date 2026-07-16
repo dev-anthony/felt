@@ -432,8 +432,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
           <ArtGenerationView 
             uploadId={activeTrackId || ""}
             // Prioritizes immediate override string context over potentially laggy state records
-            lyricContext={currentBriefOverride || metadata.expandedBrief || prompt} 
-            genre={detectedGenre}
+            lyricContext={currentBriefOverride || metadata.expandedBrief || prompt}
             onComplete={(imageUrl) => {
               onCompleteGeneration(
                 metadata.title, 
