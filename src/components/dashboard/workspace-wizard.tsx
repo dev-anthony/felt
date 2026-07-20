@@ -98,11 +98,22 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
     const zcrResult = essentia.ZeroCrossingRate(vectorData)
 
     const rawBpm = rhythmResult.bpm
-    const rawLoudness = loudnessResult.loudness ?? -12
     const rawCentroid = spectralCentroidResult.centroid || 1500
     const rawComplexity = dynamicComplexityResult.dynamicComplexity
     const rawDanceability = danceabilityResult.danceability
     const rawZcr = zcrResult.zeroCrossingRate
+
+    // Essentia's Loudness algorithm does NOT return dBFS — it returns an
+    // unbounded power figure (real tracks were storing values like 9988 and
+    // 14545). Downstream that was normalised as (loudness + 60) / 60 and clamped,
+    // so it pinned to 1.0 on every track and carried no information at all.
+    // Compute true RMS dBFS from the PCM samples instead.
+    let sumSquares = 0
+    for (let i = 0; i < channelData.length; i++) sumSquares += channelData[i] * channelData[i]
+    const rmsAmplitude = Math.sqrt(sumSquares / Math.max(1, channelData.length))
+    const rawLoudness = rmsAmplitude > 0
+      ? Math.max(-60, Math.min(0, 20 * Math.log10(rmsAmplitude)))
+      : -60
 
     const currentVector: Record<string, number | null> = {
       bpm: (rawBpm && rawBpm > 0) ? Math.max(0, Math.min(1, (rawBpm - 60) / 105)) : null, 
@@ -164,18 +175,52 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
     const rawKey = keyResult?.key ? String(keyResult.key).trim() : (targetCluster.scale === "major" ? "C" : "A")
     const rawScale = keyResult?.scale ? String(keyResult.scale).trim() : targetCluster.scale
     const finalEnergy = resolveMetric(rawComplexity ? (rawComplexity * 15) : null, "energy", 1)
-    const finalValence = resolveMetric(keyResult?.scale ? (rawScale === "major" ? 65 : 25) : null, "valence", 1)
     const finalDanceability = resolveMetric(rawDanceability ? (rawDanceability * 33.3) : null, "danceability", 1)
-    const finalAcousticness = resolveMetric(rawDanceability ? (100 - ((rawCentroid / 4000) * 100)) : null, "acousticness", 1)
+
+    // VALENCE — musical positivity.
+    // Previously this was ONLY the mode (major = 65, minor = 25), which meant
+    // every minor-key track scored 25 ("grief") no matter how joyful it sounded.
+    // Most Afrobeats, hip-hop and R&B sit in minor keys, so upbeat dance records
+    // were being read as despair and rendered as still, mournful covers.
+    // Mode still matters most, but tempo, groove and brightness now carry real
+    // weight — a fast, bright, highly danceable minor track reads as positive.
+    const modeScore = rawScale === "major" ? 0.72 : 0.34
+    const grooveScore = currentVector.danceability ?? 0.5
+    const tempoScore = currentVector.bpm ?? 0.5
+    const brightScore = currentVector.brightness ?? 0.5
+    const valence01 = Math.max(0, Math.min(1,
+      (0.42 * modeScore) + (0.24 * grooveScore) + (0.19 * tempoScore) + (0.15 * brightScore)
+    ))
+    const finalValence = Math.round(valence01 * 100)
+
+    // ACOUSTICNESS — likelihood the record is acoustic rather than electronic.
+    // Previously `100 - (centroid / 4000 * 100)`, i.e. just inverse brightness,
+    // and gated on `rawDanceability` (an unrelated variable). Any dark-sounding
+    // electronic track therefore scored as highly "acoustic".
+    // Acoustic recordings retain wide dynamics (high dynamic complexity) and have
+    // less synthetic high-frequency buzz (lower ZCR), so use those instead.
+    const dynamicsScore = Math.max(0, Math.min(1, (rawComplexity || 0) * 0.15))
+    const buzzScore = currentVector.speechiness ?? 0.5
+    const acoustic01 = Math.max(0, Math.min(1,
+      (0.45 * dynamicsScore) + (0.30 * (1 - buzzScore)) + (0.25 * (1 - brightScore))
+    ))
+    const finalAcousticness = Math.round(acoustic01 * 100)
     const finalBrightness = Math.max(0, Math.min(100, Math.round((currentVector.brightness || unifiedProgressFactor) * 100)))
     const finalSpeechiness = resolveMetric(rawZcr ? (rawZcr * 800) : null, "speechiness", 1)
 
+    // GENRE — a mathematical guess only. Essentia reads tempo and texture, not
+    // culture, so this is deliberately treated as a weak signal: the artist's
+    // declared genre overrides it downstream.
+    // The afrobeat branch previously required `finalValence > 55`, which was
+    // unreachable for minor-key tracks under the old mode-only valence — so
+    // Afrobeats records always fell through to the "hip-hop" default.
     let finalGenre = "hip-hop"
     if (currentVector.speechiness && currentVector.speechiness > 0.35 && finalBpm >= 120) finalGenre = "trap / drill"
     else if (currentVector.speechiness && currentVector.speechiness > 0.25 && finalBpm < 115) finalGenre = "boom bap / retro rap"
     else if (currentVector.brightness && currentVector.brightness > 0.65 && finalEnergy > 70) finalGenre = "electronic / dance"
     else if (finalAcousticness > 65 && finalEnergy < 45) finalGenre = "acoustic / neo-soul"
-    else if (finalDanceability > 65 && finalValence > 55) finalGenre = "pop / afrobeat"
+    // Afrobeats/amapiano signature: mid-tempo, groove-forward, not speech-heavy.
+    else if (finalDanceability > 60 && finalBpm >= 95 && finalBpm <= 130 && finalSpeechiness < 35) finalGenre = "pop / afrobeat"
 
     if (vectorData && typeof vectorData.delete === "function") vectorData.delete()
     if (essentia && typeof essentia.delete === "function") essentia.delete()
