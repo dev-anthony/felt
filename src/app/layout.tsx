@@ -82,7 +82,18 @@ export default function RootLayout({
         <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js" defer />
         <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-models.js" defer />
       </head>
-      <body className="antialiased">
+      {/*
+        suppressHydrationWarning is scoped to <body>'s OWN attributes, one level
+        deep — it does not silence mismatches in any child, so real hydration
+        bugs still surface.
+
+        It is needed because browser extensions mutate <body> before React
+        hydrates: ColorZilla adds cz-shortcut-listen="true", Grammarly adds
+        data-gr-* / data-new-gr-*. React then compares its server HTML against a
+        DOM a third party already edited and reports a mismatch we neither
+        caused nor can prevent. See vercel/next.js#72031.
+      */}
+      <body className="antialiased" suppressHydrationWarning>
         <AuthProviderWrapper>
           {children}
         </AuthProviderWrapper>
