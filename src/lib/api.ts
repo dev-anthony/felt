@@ -343,7 +343,7 @@ export const uploadApi = {
       method: 'POST',
       body: JSON.stringify(features),
     }),
-  transcribeTrack: (uploadId: string, artistName?: string) =>
+  transcribeTrack: (uploadId: string, artistName?: string, declaredEmotion?: string | null) =>
     request<{
       transcript: string
       expanded: string
@@ -353,7 +353,11 @@ export const uploadApi = {
       matched?: { title: string; artist: string }
     }>(`/api/generations/transcribe`, {
       method: 'POST',
-      body: JSON.stringify({ upload_id: uploadId, artist_name: artistName }),
+      body: JSON.stringify({
+        upload_id: uploadId,
+        artist_name: artistName,
+        declared_emotion: declaredEmotion || undefined,
+      }),
     }),
 
   getUploads: (limit = 20, offset = 0) =>
@@ -368,8 +372,32 @@ export const uploadApi = {
     }),
 }
 
+/** One selectable feeling from the backend emotion taxonomy. */
+export interface EmotionOption {
+  id: string
+  label: string
+  definition: string
+  /** Set only for terms with no English equivalent (saudade, hiraeth, han...). */
+  origin: string | null
+}
+
+export interface EmotionFamily {
+  archetype: string
+  label: string
+  register: string
+  emotions: EmotionOption[]
+}
+
+export const emotionApi = {
+  /**
+   * Static reference data, cached hard by the server. Fetch once per session —
+   * it never changes at runtime.
+   */
+  list: () => request<{ count: number; families: EmotionFamily[] }>('/api/emotions'),
+}
+
 export const generationApi = {
-  expand: (body: { upload_id: string; basic_input: string }) =>
+  expand: (body: { upload_id: string; basic_input: string; declared_emotion?: string | null }) =>
     request<{ original: string; expanded: string; technique: Technique }>('/api/generations/expand', {
       method: 'POST',
       body: JSON.stringify(body),

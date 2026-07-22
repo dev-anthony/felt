@@ -10,6 +10,8 @@ import { getErrorMessage } from "@/lib/errors"
 interface FeelingExpanderViewProps {
   userPrompt: string
   trackId: string
+  /** The artist's selected feeling, if they chose one. */
+  declaredEmotion?: string | null
   onApprove: (expandedText: string) => void
   onStartOver: () => void
 }
@@ -17,6 +19,7 @@ interface FeelingExpanderViewProps {
 export function FeelingExpanderView({
   userPrompt,
   trackId,
+  declaredEmotion,
   onApprove,
   onStartOver
 }: FeelingExpanderViewProps) {
@@ -41,6 +44,7 @@ export function FeelingExpanderView({
       const data = await generationApi.expand({
         upload_id: trackId,
         basic_input: userPrompt,
+        declared_emotion: declaredEmotion,
       })
       setExpandedText(data.expanded)
     } catch (err) {
@@ -51,7 +55,7 @@ export function FeelingExpanderView({
     } finally {
       setIsLoading(false)
     }
-  }, [trackId, userPrompt])
+  }, [trackId, userPrompt, declaredEmotion])
 
   React.useEffect(() => {
     // fetch-on-mount.

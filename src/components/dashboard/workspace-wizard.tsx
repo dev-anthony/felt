@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { ProcessingView } from "@/components/dashboard/processing-view"
 import { FeelingExpanderView } from "@/components/dashboard/feeling-expander-view"
 import { ArtGenerationView } from "@/components/dashboard/art-generation-view"
+import { EmotionPicker } from "@/components/dashboard/emotion-picker"
 import { uploadApi } from "@/lib/api"
 import { getErrorMessage } from "@/lib/errors"
 
@@ -84,6 +85,10 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
   const [prompt, setPrompt] = React.useState("")
   const [file, setFile] = React.useState<File | null>(null)
   const [currentBriefOverride, setCurrentBriefOverride] = React.useState<string>("")
+  // The artist's selected feeling. Optional, and deliberately SEPARATE from the
+  // sentence: the label gives the engine a scoreable coordinate, the sentence
+  // gives the scene writer a concrete episode. Neither substitutes for the other.
+  const [declaredEmotion, setDeclaredEmotion] = React.useState<string | null>(null)
   
   const [isDragging, setIsDragging] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
@@ -512,7 +517,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
       } else {
   // Direct route for vocal files: Genius → Deepgram fallback → Gemini scene synthesis, all server-side
   setAnalysisStatus("Looking up lyrics online...")
-  const transcribeResponse = await uploadApi.transcribeTrack(trackId, artistName.trim() || undefined)
+  const transcribeResponse = await uploadApi.transcribeTrack(trackId, artistName.trim() || undefined, declaredEmotion)
 
   if (transcribeResponse.source === 'genius') {
     setAnalysisStatus(`Found lyrics for "${transcribeResponse.matched?.title}" by ${transcribeResponse.matched?.artist}`)
@@ -657,6 +662,12 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
                   className="rounded-none bg-background border-border/40 text-sm"
                 />
               </div>
+
+              <EmotionPicker
+                value={declaredEmotion}
+                onChange={setDeclaredEmotion}
+                disabled={isUploading}
+              />
             </div>
 
             <div className="pt-4 flex items-center justify-end gap-3 border-t border-border/20 mt-2 shrink-0">
@@ -695,6 +706,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
           <FeelingExpanderView
             userPrompt={prompt}
             trackId={activeTrackId!}
+            declaredEmotion={declaredEmotion}
             onApprove={(expandedBrief) => {
               setMetadata(prev => ({ ...prev, expandedBrief }))
               setCurrentStep("PROCESSING")
