@@ -30,7 +30,8 @@ export default function GalleryPage() {
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
 
   const load = React.useCallback(async (nextOffset: number, replace: boolean) => {
-    replace ? setLoading(true) : setLoadingMore(true)
+    if (replace) setLoading(true)
+    else setLoadingMore(true)
     setError(null)
     try {
       const data = await uploadApi.getUploads(PAGE_SIZE, nextOffset)
@@ -52,6 +53,10 @@ export default function GalleryPage() {
   }, [])
 
   React.useEffect(() => {
+    // fetch-on-mount.
+    // The request IS the external system this effect synchronises with; the
+    // setState it triggers happens in the async resolution, not in this body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load(0, true)
   }, [load])
 

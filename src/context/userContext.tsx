@@ -35,7 +35,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const query = params.toString()
         router.replace(`${pathname}${query ? `?${query}` : ""}`)
       }
-    } catch (err) {
+    } catch {
       setUser(null)
       
       // PROTECTION GUARD: If user validation fails while on a private screen, bounce them back to landing page
@@ -62,6 +62,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     // Only invoke lookup lookups inside protected paths or at home root
     if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route)) || pathname === "/") {
+      // session lookup.
+      // Validating the session against the backend is synchronisation with an
+      // external system, which is exactly what an effect is for.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       refreshUser()
     } else {
       setLoading(false)

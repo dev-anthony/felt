@@ -17,7 +17,7 @@ export function StepCityInfluence({ initialValue, onProceed, onBack }: StepCityI
   return (
     <div className="space-y-6 w-full min-w-0">
       <div className="min-w-0">
-        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">// Phase 03</span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">{"// Phase 03"}</span>
         <h3 className="font-display italic text-2xl text-foreground">Spatial Foundation</h3>
         <p className="font-sans text-xs text-muted-foreground mt-1">Which geographic ecosystem or city structure engineered your current musical direction?</p>
       </div>

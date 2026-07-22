@@ -4,6 +4,7 @@
 import * as React from "react"
 import { Sparkles, AlertCircle, RefreshCw } from "lucide-react"
 import { generationApi } from "@/lib/api"
+import { getErrorMessage } from "@/lib/errors"
 
 interface ArtGenerationViewProps {
   uploadId: string
@@ -37,9 +38,9 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
       } else {
         throw new Error("No image canvas URL returned from server infrastructure.")
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("[GENERATION WORKFLOW FAULT]:", err)
-      setErrorMessage(err?.message || "Failed to finalize sync rendering pipeline.")
+      setErrorMessage(getErrorMessage(err, "Failed to finalize sync rendering pipeline."))
       setStatus("error")
     }
   }, [uploadId, lyricContext])

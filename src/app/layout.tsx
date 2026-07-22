@@ -1,5 +1,26 @@
 import type { Metadata } from "next";
+import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+/**
+ * Self-hosted via next/font instead of a Google Fonts <link>. Identical
+ * typefaces and weights - this only changes HOW they load: the files are served
+ * from our own origin at build time, which removes two preconnects plus a
+ * render-blocking stylesheet round-trip, and eliminates the flash of unstyled
+ * text. `display: swap` matches the previous &display=swap.
+ */
+const inter = Inter({
+  subsets: ["latin"], weight: ["300", "400", "600", "700"],
+  variable: "--font-inter", display: "swap",
+});
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"], weight: ["400", "500"], style: ["italic"],
+  variable: "--font-cormorant", display: "swap",
+});
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"], weight: ["300", "400", "700"],
+  variable: "--font-jetbrains", display: "swap",
+});
 import { AuthProviderWrapper } from "@/components/providers/app-provider-wrapper";
 
 export const metadata: Metadata = {
@@ -55,14 +76,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;700&display=swap" 
-          rel="stylesheet" 
-        />
         <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js" defer />
         <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js" defer />
         <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-models.js" defer />

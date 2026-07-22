@@ -95,7 +95,7 @@ export default function OnboardingPage() {
         </div>
         <div className="flex justify-between items-center px-0.5 gap-3">
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground truncate">
-            // VIBE CHECK INITIALIZATION
+            {"// VIBE CHECK INITIALIZATION"}
           </span>
           <span className="font-mono text-[9px] text-accent tracking-widest font-bold shrink-0">
             0{currentStep} / 0{TOTAL_STEPS}

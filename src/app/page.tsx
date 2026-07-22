@@ -90,35 +90,35 @@ export default function Index() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
             <div className="p-6 border border-border bg-foreground/[0.01] space-y-3 reveal">
-              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">// Audio Analysis Engine</h3>
+              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">{"// Audio Analysis Engine"}</h3>
               <p className="text-muted-foreground font-light text-xs leading-relaxed">
                 Accepts MP3/WAV tracks across any genre. The system analyzes key sensory metrics—tempo, valence, and key fingerprints—to build your art.
               </p>
             </div>
 
             <div className="p-6 border border-border bg-foreground/[0.01] space-y-3 reveal" style={{ animationDelay: "50ms" }}>
-              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">// Dual Context Processing</h3>
+              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">{"// Dual Context Processing"}</h3>
               <p className="text-muted-foreground font-light text-xs leading-relaxed">
                 Whisper transcription extracts structural storytelling from vocal lines, while an internal Feeling Expander shapes abstract producer ideas into pristine design blueprints.
               </p>
             </div>
 
             <div className="p-6 border border-border bg-foreground/[0.01] space-y-3 reveal" style={{ animationDelay: "100ms" }}>
-              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">// Intuitive Curation Controls</h3>
+              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">{"// Intuitive Curation Controls"}</h3>
               <p className="text-muted-foreground font-light text-xs leading-relaxed">
                 Select visual presets via a mood-based Filter Picker. Fine-tune your output variants smoothly with intuitive, simple style steering sliders.
               </p>
             </div>
 
             <div className="p-6 border border-border bg-foreground/[0.01] space-y-3 reveal" style={{ animationDelay: "150ms" }}>
-              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">// Simultaneous Generation</h3>
+              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">{"// Simultaneous Generation"}</h3>
               <p className="text-muted-foreground font-light text-xs leading-relaxed">
                 Every generation process outputs three separate, high-fidelity creative directions instantly, giving you immediate artistic choices.
               </p>
             </div>
 
             <div className="p-6 border border-border bg-foreground/[0.01] space-y-3 reveal" style={{ animationDelay: "200ms" }}>
-              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">// Evolving Identity Archives</h3>
+              <h3 className="font-mono text-[10px] tracking-wider uppercase text-accent">{"// Evolving Identity Archives"}</h3>
               <p className="text-muted-foreground font-light text-xs leading-relaxed">
                 A localized history blueprint that logs city origin data, essential sound attributes, and visual generation patterns as your record catalog expands.
               </p>

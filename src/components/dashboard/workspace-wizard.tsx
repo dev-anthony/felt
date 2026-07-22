@@ -10,6 +10,56 @@ import { ProcessingView } from "@/components/dashboard/processing-view"
 import { FeelingExpanderView } from "@/components/dashboard/feeling-expander-view"
 import { ArtGenerationView } from "@/components/dashboard/art-generation-view"
 import { uploadApi } from "@/lib/api"
+import { getErrorMessage } from "@/lib/errors"
+
+/**
+ * The minimal Essentia surface the DSP pass touches.
+ *
+ * essentia.js declares every algorithm as returning `any` in its own
+ * core_api.d.ts, so there is nothing to import. Narrowing it here to exactly
+ * the calls we make means a typo in an algorithm name or output field is a
+ * compile error instead of a silent `undefined` at upload time — which is how
+ * a DSP feature would otherwise go quietly missing in production.
+ *
+ * Every handle is a WASM object that must be released via `delete()`.
+ */
+type EssentiaVector = { delete?: () => void }
+
+interface EssentiaDsp {
+  arrayToVector(input: Float32Array): EssentiaVector
+  vectorToArray(vector: EssentiaVector): Float32Array
+  FrameGenerator(
+    input: Float32Array,
+    frameSize?: number,
+    hopSize?: number,
+  ): { size(): number; get(i: number): EssentiaVector; delete?: () => void }
+  Windowing(
+    frame: EssentiaVector,
+    normalized?: boolean,
+    size?: number,
+    type?: string,
+  ): { frame: EssentiaVector }
+  Spectrum(frame: EssentiaVector, size?: number): { spectrum: EssentiaVector }
+  OnsetRate(signal: EssentiaVector): { onsetRate?: number; onsets?: EssentiaVector }
+  // High-level extractors used for the baseline feature set.
+  RhythmExtractor2013(signal: EssentiaVector): { bpm?: number }
+  KeyExtractor(signal: EssentiaVector): { key?: string; scale?: string }
+  Danceability(signal: EssentiaVector): { danceability?: number }
+  DynamicComplexity(signal: EssentiaVector): { dynamicComplexity?: number }
+  SpectralCentroidTime(signal: EssentiaVector): { centroid?: number }
+  ZeroCrossingRate(signal: EssentiaVector): { zeroCrossingRate?: number }
+  delete?: () => void
+}
+
+declare global {
+  interface Window {
+    /** Safari's prefixed AudioContext, still required on older iOS WebKit. */
+    webkitAudioContext?: typeof AudioContext
+    /** essentia.js UMD globals, loaded from a <script> tag rather than imported. */
+    Essentia?: new (wasm: unknown) => EssentiaDsp
+    EssentiaWASM?: () => Promise<unknown>
+  }
+}
 
 interface WorkspaceWizardProps {
   onClose: () => void
@@ -41,7 +91,6 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
   const [errorMessage, setErrorMessage] = React.useState("")
   
   const [activeTrackId, setActiveTrackId] = React.useState<string | null>(editTrack?.id || null)
-  const [detectedGenre, setDetectedGenre] = React.useState<string | undefined>(undefined)
   
   const [metadata, setMetadata] = React.useState<TrackMetadata & { lyricTranscript?: string }>({
     title: editTrack?.title || "",
@@ -69,17 +118,200 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
     setFile(selectedFile)
   }
 
+  // ── Research Module 3: DSP feature expansion ─────────────────────────────
+  // Five timbral/rhythmic signals Essentia's high-level algorithms do not
+  // expose, all computed from ONE shared frame loop so the cost is paid once.
+  //
+  // Analysed over a SAMPLED WINDOW (centred, capped at DSP_WINDOW_SECONDS)
+  // rather than the whole file: this runs in the artist's browser during
+  // upload, and full-track framing on a long file is the difference between a
+  // responsive step and a visibly frozen one. The centre of a track is also
+  // more representative than an intro or a fade-out.
+  //
+  // Only OnsetRate uses a WASM algorithm. Flux, Flatness and Sub-Bass Ratio are
+  // computed in plain JS from the magnitude spectrum we already hold,
+  // deliberately:
+  //   - Essentia's Flux keeps internal state between invocations, so calling it
+  //     per frame from JS does not yield a true frame-to-frame delta;
+  //   - Flatness and Sub-Bass are short formulas, and computing them here
+  //     avoids thousands of extra WASM allocations inside the loop.
+  //
+  // Best-effort by design: any failure returns nulls and the pipeline continues
+  // on the existing feature set. A DSP problem must never fail an upload.
+  const DSP_WINDOW_SECONDS = 60
+  const DSP_FRAME_SIZE = 2048
+  const DSP_HOP_SIZE = 2048 // no overlap — halves the loop cost, ample for means
+
+  const extractDspFeatures = (
+    essentia: EssentiaDsp,
+    channelData: Float32Array,
+    sampleRate: number,
+  ) => {
+    // NOTE: MFCC1 is deliberately NOT extracted. Module 3 presents it as a
+    // "vocal presence" metric (">40.0 indicates upfront vocal intimacy"), but
+    // MFCC coefficient 0 is the log-energy of the mel spectrum — an overall
+    // loudness descriptor, not a vocal detector. We already measure loudness,
+    // and we know vocal-vs-instrumental for certain from the upload form
+    // (trackType), which beats any DSP proxy. Dropping it also removes a WASM
+    // call per frame.
+    const empty = {
+      spectral_flux: null as number | null,
+      spectral_flatness: null as number | null,
+      sub_bass_ratio: null as number | null,
+      onset_rate: null as number | null,
+    }
+
+    let windowVector: EssentiaVector | null = null
+    let frames: ReturnType<EssentiaDsp['FrameGenerator']> | null = null
+
+    try {
+      // Centred sample window.
+      const maxSamples = Math.floor(DSP_WINDOW_SECONDS * sampleRate)
+      const windowData =
+        channelData.length > maxSamples
+          ? channelData.subarray(
+              Math.floor((channelData.length - maxSamples) / 2),
+              Math.floor((channelData.length - maxSamples) / 2) + maxSamples,
+            )
+          : channelData
+
+      if (windowData.length < DSP_FRAME_SIZE * 2) return empty
+
+      windowVector = essentia.arrayToVector(windowData)
+
+      // Track-level: onsets per second. No frame loop — Essentia does its own.
+      let onsetRate: number | null = null
+      try {
+        const r = essentia.OnsetRate(windowVector)
+        const v = r?.onsetRate
+        // `typeof` first: Number.isFinite is typed (value: unknown) => boolean,
+        // so it does not narrow `number | undefined` on its own.
+        if (typeof v === 'number' && Number.isFinite(v)) onsetRate = v
+        if (r?.onsets?.delete) r.onsets.delete()
+      } catch {
+        // OnsetRate is the most expensive call here; losing it alone is fine.
+      }
+
+      frames = essentia.FrameGenerator(windowData, DSP_FRAME_SIZE, DSP_HOP_SIZE)
+      const frameCount = frames.size()
+      if (!frameCount) return { ...empty, onset_rate: onsetRate }
+
+      // Spectrum bin → Hz. Spectrum length is frameSize/2 + 1 spanning 0..Nyquist.
+      const nyquist = sampleRate / 2
+      // Module 3 defines sub-bass as 20–60 Hz over a 20 Hz–Nyquist denominator.
+      // 60 Hz (not 120) is the correct boundary: 808 fundamentals sit at 30–60 Hz,
+      // and everything above is "bass", which would dilute the discriminator.
+      const SUB_BASS_LO_HZ = 20
+      const SUB_BASS_HI_HZ = 60
+
+      let fluxSum = 0
+      let fluxCount = 0
+      let flatnessSum = 0
+      let subBassSum = 0
+      let specCount = 0
+      let prevSpec: Float32Array | null = null
+
+      for (let i = 0; i < frameCount; i++) {
+        const frame = frames.get(i)
+        let windowed: ReturnType<EssentiaDsp['Windowing']> | null = null
+        let spec: ReturnType<EssentiaDsp['Spectrum']> | null = null
+        try {
+          windowed = essentia.Windowing(frame, true, DSP_FRAME_SIZE, "hann")
+          spec = essentia.Spectrum(windowed.frame, DSP_FRAME_SIZE)
+          const mags: Float32Array = essentia.vectorToArray(spec.spectrum)
+          if (!mags || mags.length < 4) continue
+
+          // ---- Spectral Flatness: geometric mean / arithmetic mean.
+          // 1.0 = flat/noise-like (distortion, percussion, noise floors),
+          // → 0 = tonal/peaky (clean synthesis, sustained pitched material).
+          let logSum = 0
+          let linSum = 0
+          const EPS = 1e-10
+          for (let b = 0; b < mags.length; b++) {
+            const m = mags[b] + EPS
+            logSum += Math.log(m)
+            linSum += m
+          }
+          const geoMean = Math.exp(logSum / mags.length)
+          const arithMean = linSum / mags.length
+          if (arithMean > EPS) flatnessSum += geoMean / arithMean
+
+          // ---- Sub-Bass Ratio (Module 3): POWER (|X|², not magnitude) in
+          // 20–60 Hz over total power from 20 Hz up, per the research equation.
+          const hzToBin = (hz: number) =>
+            Math.round((hz / nyquist) * (mags.length - 1))
+          const loBin = Math.max(1, hzToBin(SUB_BASS_LO_HZ))
+          const hiBin = Math.max(loBin, hzToBin(SUB_BASS_HI_HZ))
+          let subPower = 0
+          let totalPower = 0
+          for (let b = loBin; b < mags.length; b++) {
+            const p = mags[b] * mags[b]
+            totalPower += p
+            if (b <= hiBin) subPower += p
+          }
+          if (totalPower > EPS) subBassSum += subPower / totalPower
+
+          specCount++
+
+          // ---- Spectral Flux.
+          // Module 3 gives SF = Σ(|X(t,f)| − |X(t−1,f)|)² and claims a 0..1
+          // range. That claim does not hold: a sum of squared differences is
+          // unbounded and scales with absolute spectrum magnitude, so a loud
+          // master would read as "volatile" purely for being loud.
+          //
+          // Rectified flux on L1-NORMALISED spectra instead. L1 (divide by the
+          // sum, so each frame sums to 1) is the choice that actually bounds the
+          // result: with Σa = Σb = 1 we have Σ(a−b) = 0, so the positive part is
+          // exactly half the L1 distance and therefore ≤ 1 — a true 0..1 with no
+          // fudge factor. (L2 normalising does NOT bound this sum: for a unit-L2
+          // vector spread over N bins the positive-difference sum can reach √N.)
+          const specSum = linSum - mags.length * EPS || 1
+          const cur = new Float32Array(mags.length)
+          for (let b = 0; b < mags.length; b++) cur[b] = mags[b] / specSum
+          if (prevSpec && prevSpec.length === cur.length) {
+            let d = 0
+            for (let b = 0; b < cur.length; b++) {
+              const diff = cur[b] - prevSpec[b]
+              if (diff > 0) d += diff
+            }
+            fluxSum += Math.min(1, d)
+            fluxCount++
+          }
+          prevSpec = cur
+
+        } finally {
+          if (windowed?.frame?.delete) windowed.frame.delete()
+          if (spec?.spectrum?.delete) spec.spectrum.delete()
+        }
+      }
+
+      return {
+        spectral_flux: fluxCount ? fluxSum / fluxCount : null,
+        spectral_flatness: specCount ? flatnessSum / specCount : null,
+        sub_bass_ratio: specCount ? subBassSum / specCount : null,
+        onset_rate: onsetRate,
+      }
+    } catch (err) {
+      console.warn("[DSP] extraction failed, continuing without it:", err)
+      return empty
+    } finally {
+      if (frames?.delete) frames.delete()
+      if (windowVector?.delete) windowVector.delete()
+    }
+  }
+
   const extractAudioFeatures = async (audioFile: File) => {
     setAnalysisStatus("Decoding audio channels...")
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const AudioCtor = window.AudioContext || window.webkitAudioContext
+    if (!AudioCtor) throw new Error("Web Audio API is unavailable in this browser.")
+    const audioCtx = new AudioCtor()
     const arrayBuffer = await audioFile.arrayBuffer()
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
     const channelData = audioBuffer.getChannelData(0)
 
     setAnalysisStatus("Extracting core multi-dimensional profiles...")
-    const targetWindow = window as any
-    const EssentiaClass = targetWindow.Essentia
-    const EssentiaWASMModule = targetWindow.EssentiaWASM
+    const EssentiaClass = window.Essentia
+    const EssentiaWASMModule = window.EssentiaWASM
 
     if (!EssentiaClass || !EssentiaWASMModule) {
       throw new Error("Audio engine components are still initializing onto the client window context.")
@@ -93,7 +325,6 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
     const keyResult = essentia.KeyExtractor(vectorData)
     const danceabilityResult = essentia.Danceability(vectorData)
     const dynamicComplexityResult = essentia.DynamicComplexity(vectorData)
-    const loudnessResult = essentia.Loudness(vectorData)
     const spectralCentroidResult = essentia.SpectralCentroidTime(vectorData)
     const zcrResult = essentia.ZeroCrossingRate(vectorData)
 
@@ -142,7 +373,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
       Object.keys(currentVector).forEach((key) => {
         const currentVal = currentVector[key]
         if (currentVal !== null && !isNaN(currentVal)) {
-          const targetCenter = (cluster.centers as any)[key]
+          const targetCenter = (cluster.centers as Record<string, number>)[key]
           sumOfSquares += Math.pow(currentVal - targetCenter, 2)
           activeDimensionsCount++
         }
@@ -166,7 +397,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
 
     const resolveMetric = (rawVal: number | null | undefined, key: string, multiplier = 1) => {
       if (rawVal !== null && rawVal !== undefined && rawVal > 0 && !isNaN(rawVal)) return Math.round(rawVal * multiplier)
-      const range = (targetCluster.ranges as any)[key]
+      const range = (targetCluster.ranges as Record<string, number[]>)[key]
       if (!range) return Math.round(unifiedProgressFactor * multiplier)
       return Math.round((range[0] + (range[1] - range[0]) * unifiedProgressFactor) * multiplier)
     }
@@ -222,10 +453,17 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
     // Afrobeats/amapiano signature: mid-tempo, groove-forward, not speech-heavy.
     else if (finalDanceability > 60 && finalBpm >= 95 && finalBpm <= 130 && finalSpeechiness < 35) finalGenre = "pop / afrobeat"
 
+    // Research Module 3 DSP pass — runs on the same Essentia instance, before
+    // teardown. Additive: every field is nullable and nothing above depends on
+    // it, so a failure here cannot change any existing feature.
+    setAnalysisStatus("Reading timbral texture and rhythmic density...")
+    const dsp = extractDspFeatures(essentia, channelData, audioBuffer.sampleRate)
+
     if (vectorData && typeof vectorData.delete === "function") vectorData.delete()
     if (essentia && typeof essentia.delete === "function") essentia.delete()
 
     return {
+      ...dsp,
       bpm: finalBpm, key: rawKey, scale: rawScale,
       energy: Math.max(10, Math.min(100, finalEnergy)),
       valence: Math.max(0, Math.min(100, finalValence)),
@@ -262,7 +500,6 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
 
       // 2. Extract DSP maps via native Essentia execution loop
       const features = await extractAudioFeatures(file)
-      setDetectedGenre(features.genre)
 
       setAnalysisStatus("Aligning sonic profiling features...")
       await uploadApi.submitAnalysis(trackId, features)
@@ -297,9 +534,9 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
   setCurrentStep("PROCESSING")
   setIsUploading(false)
 }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Vocal synthesis pipeline crash:", err)
-      setErrorMessage(err?.message || "Audio vocal tracking synthesis chain failed.")
+      setErrorMessage(getErrorMessage(err, "Audio vocal tracking synthesis chain failed."))
       setIsUploading(false)
     }
   }
