@@ -10,16 +10,17 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   
-  const [isAuthOpen, setIsAuthOpen] = React.useState(false);
+  // The URL is the single source of truth for whether the auth dialog is open.
+  //
+  // This previously mirrored `triggerAuth` into local state via an effect, which
+  // desynchronised on close: closing the dialog on "/" set the state to false but
+  // left `?auth=true` in the URL, so `triggerAuth` stayed true and the blur
+  // overlay below (which reads `triggerAuth`, not the state) kept its
+  // `pointer-events-none` — leaving the landing page blurred and unclickable
+  // with no dialog to dismiss. Deriving it removes the desync, the extra render,
+  // and the effect.
   const triggerAuth = searchParams.get("auth") === "true";
-
-  React.useEffect(() => {
-    if (triggerAuth) {
-      setIsAuthOpen(true);
-    } else {
-      setIsAuthOpen(false);
-    }
-  }, [triggerAuth]);
+  const isAuthOpen = triggerAuth;
 
   // THE FIX: Automatically scrub the ?auth=true parameter if we land on a secure route successfully
   React.useEffect(() => {
@@ -34,13 +35,21 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
   }, [triggerAuth, pathname, searchParams, router]);
 
   const handleOpenChange = (open: boolean) => {
-    setIsAuthOpen(open);
-    
-    // If they cancel out of the modal manually while sitting on a protected route,
-    // safely bounce them back to the landing page.
-    if (!open && pathname !== "/") {
+    if (open) return; // opening is driven solely by ?auth=true
+
+    // If they cancel out of the modal while sitting on a protected route,
+    // bounce them back to the landing page (which drops the param with it).
+    if (pathname !== "/") {
       router.push("/");
+      return;
     }
+
+    // On the landing page, drop the param so the dialog AND the blur overlay
+    // both clear together.
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("auth");
+    const query = params.toString();
+    router.replace(`${pathname}${query ? `?${query}` : ""}`);
   };
 
   return (

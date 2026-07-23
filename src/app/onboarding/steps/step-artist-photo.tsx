@@ -11,17 +11,21 @@ interface StepArtistPhotoProps {
 
 export function StepArtistPhoto({ initialValue, onProceed }: StepArtistPhotoProps) {
   const [file, setFile] = React.useState<File | null>(initialValue)
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null)
   const [isDragging, setIsDragging] = React.useState(false)
 
+  // Derived during render rather than written into state from an effect: the
+  // preview is a pure function of `file`, so the old version rendered once with
+  // a stale/null URL and then again after the effect wrote state. The effect
+  // now does only what an effect is for — releasing the object URL, which is an
+  // external resource that must be revoked to avoid leaking the blob.
+  const previewUrl = React.useMemo(
+    () => (file ? URL.createObjectURL(file) : null),
+    [file],
+  )
   React.useEffect(() => {
-    if (file) {
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
-      return () => URL.revokeObjectURL(url)
-    }
-    setPreviewUrl(null)
-  }, [file])
+    if (!previewUrl) return
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [previewUrl])
 
   const handleFile = (selectedFile: File) => {
     if (selectedFile.type.startsWith("image/")) {
@@ -32,7 +36,7 @@ export function StepArtistPhoto({ initialValue, onProceed }: StepArtistPhotoProp
   return (
     <div className="space-y-6 w-full min-w-0">
       <div className="min-w-0">
-        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">// Phase 01</span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">{"// Phase 01"}</span>
         <h3 className="font-display italic text-2xl text-foreground">Identity Capture</h3>
         <p className="font-sans text-xs text-muted-foreground mt-1">Upload an image configuration that matches your structural profile as an artist.</p>
       </div>

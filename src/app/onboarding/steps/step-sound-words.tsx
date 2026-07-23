@@ -24,7 +24,7 @@ export function StepSoundWords({ initialValues, onProceed, onBack }: StepSoundWo
   return (
     <div className="space-y-6 w-full min-w-0">
       <div className="min-w-0">
-        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">// Phase 02</span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">{"// Phase 02"}</span>
         <h3 className="font-display italic text-2xl text-foreground">Acoustic Profiles</h3>
         <p className="font-sans text-xs text-muted-foreground mt-1">Isolate three explicit keywords that describe your sonic footprint. No constraints.</p>
       </div>

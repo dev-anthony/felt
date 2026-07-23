@@ -1,5 +1,13 @@
 "use client"
 
+/* eslint-disable @next/next/no-img-element -- The generated-cover host is not
+   fixed. The backend uploads to Cloudinary but falls back to the raw provider URL
+   (Pollinations / Together / Replicate / HuggingFace) when that upload fails, so no
+   finite next/image `remotePatterns` list can cover every case. next/image would
+   throw "hostname is not configured" precisely when generation is already
+   degraded, turning a soft failure into a broken page. A plain <img> is correct
+   here. */
+
 import * as React from "react"
 import { useRouter } from "next/navigation"
 
@@ -46,6 +54,9 @@ export default function DashboardPage() {
 
   React.useEffect(() => {
     if (!userLoading && user) {
+      // fetch-on-mount.
+      // The request IS the external system this effect synchronises with.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchDashboardData()
     }
   }, [userLoading, user, fetchDashboardData])
@@ -112,7 +123,7 @@ export default function DashboardPage() {
       }
       setEditingTrack((prev) => (prev ? { ...prev, currentImageUrl: result.image_url } : null));
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("[REGEN HANDLER EXCEPTION]:", err);
       throw err;
     }
@@ -161,7 +172,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/40">
         <div>
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block mb-1">
-            // Operational Matrix — Welcome {user?.name || "Creator"}
+            {"// Operational Matrix — Welcome "}{user?.name || "Creator"}
           </span>
           <h1 className="font-display italic text-4xl tracking-tight">Artist Studio</h1>
         </div>
@@ -211,7 +222,7 @@ export default function DashboardPage() {
             <Music4 className="size-8 text-muted-foreground/20 stroke-[1px] mb-4" />
             <p className="font-display italic text-xl text-foreground mb-1">The canvas is silent.</p>
             <p className="font-sans text-xs text-muted-foreground max-w-xs mx-auto mb-6">
-              You haven't uploaded any sounds yet. Initiate your first acoustic analysis blueprint to manifest artwork.
+              You haven&apos;t uploaded any sounds yet. Initiate your first acoustic analysis blueprint to manifest artwork.
             </p>
             <Button 
               onClick={() => setIsUploadOpen(true)}
@@ -379,7 +390,7 @@ export default function DashboardPage() {
               Purge Track Blueprint?
             </DialogTitle>
             <DialogDescription className="text-muted-foreground text-xs leading-relaxed max-w-xs">
-              Are you sure you want to permanently delete <span className="text-foreground font-semibold italic">"{trackToDelete?.title}"</span>? This will instantly destroy the database row, its fine-art cover layers, and the audio binaries off the storage cluster.
+              Are you sure you want to permanently delete <span className="text-foreground font-semibold italic">&quot;{trackToDelete?.title}&quot;</span>? This will instantly destroy the database row, its fine-art cover layers, and the audio binaries off the storage cluster.
             </DialogDescription>
           </DialogHeader>
 

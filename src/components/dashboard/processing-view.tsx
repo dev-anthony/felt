@@ -9,19 +9,26 @@ interface ProcessingViewProps {
   onComplete: () => void
 }
 
+// Module scope: this list is constant, so rebuilding it on every render only
+// churned allocations and forced the status effect to see a new array identity.
+// Copy corrected to name what the pipeline actually does — lyrics come from a
+// Genius lookup first and fall back to Deepgram transcription; Whisper is not
+// in the stack.
+const PROCESS_STATUSES = [
+  "Reading the feeling in your music...",
+  "Essentia.js analyzing core spectral brightness & valence...",
+  "Looking up lyrics, then transcribing what it hears...",
+  "Assembling unified emotional canvas blueprint...",
+] as const
+
 export function ProcessingView({ title, onComplete }: ProcessingViewProps) {
   const [statusIndex, setStatusIndex] = React.useState(0)
-
-  const processStatuses = [
-    "Reading the feeling in your music...",
-    "Essentia.js analyzing core spectral brightness & valence...",
-    "Whisper API transcribing vocal signature contours...",
-    "Assembling unified emotional canvas blueprint...",
-  ]
+  const processStatuses = PROCESS_STATUSES
 
   React.useEffect(() => {
     const textInterval = setInterval(() => {
-      setStatusIndex((prev) => (prev < processStatuses.length - 1 ? prev + 1 : prev))
+      // PROCESS_STATUSES is module scope, so it needs no entry in the dep array.
+      setStatusIndex((prev) => (prev < PROCESS_STATUSES.length - 1 ? prev + 1 : prev))
     }, 2500)
 
     const completeTimeout = setTimeout(() => {
