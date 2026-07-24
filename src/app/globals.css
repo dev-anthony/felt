@@ -4,14 +4,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * FELT — Gallery editorial design system.
- * Black ground (#080808), bone foreground, single muted sage/stone accent.
- */
 
 @theme {
-  /* Self-hosted next/font families (see app/layout.tsx), with the same
-     system fallbacks as before. */
+
   --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -63,12 +58,12 @@
 
 :root {
   --radius: 0.125rem;
-  /* Font variables so the utility classes keep working. */
+
   --font-sans: var(--font-inter), sans-serif;
   --font-mono: var(--font-jetbrains), monospace;
   --font-display: var(--font-cormorant), serif;
 
-  /* FELT palette — black ground, bone fg, sage-stone accent */
+
   --background: oklch(0.12 0 0);
   --foreground: oklch(0.95 0.012 90);
   --card: oklch(0.14 0 0);
