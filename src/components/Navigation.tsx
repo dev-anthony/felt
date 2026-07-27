@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useNavStore } from "@/store/useNavStore";
@@ -12,6 +12,17 @@ export function Navigation() {
   const { context, setContext } = useNavStore();
   const [isOpen, setIsOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  // Solid/blurred once scrolled past the hero, transparent at the very top —
+  // the previous mix-blend-difference treatment depended on always having
+  // bright imagery directly behind it, which the redesigned hero no longer
+  // guarantees everywhere.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const toggleNav = () => setIsOpen(!isOpen);
   const handleLinkClick = () => setIsOpen(false);
@@ -37,48 +48,69 @@ export function Navigation() {
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-10 py-7 mix-blend-difference">
-        <Link href="/" aria-label="FELT home" className="flex items-center shrink-0">
-          {/* felt_logo.png is the cropped 540x220 wordmark. The *_white*.png files
-              are 500x500/800x800 squares with the wordmark floating in transparent
-              padding, so any height applied to them shrinks the glyph to nothing.
-              h-8 ≈ the old `text-3xl` (30px) text logo it replaced. */}
-          <Image
-            src="/felt_logo.png"
-            alt="FELT"
-            width={120}
-            height={49}
-            priority
-            className="h-8 w-auto select-none"
-          />
-        </Link>
-        <div className="hidden md:flex gap-12 text-[11px] font-mono tracking-[0.25em] uppercase items-center">
-          {context === 'landing' ? (
-            <>
-              <a href="#features" className="hover:text-accent transition-colors">Features</a>
-              <a href="#pricing" className="hover:text-accent transition-colors">Pricing</a>
-              <button 
+      {/* Desktop Navigation — a floating capsule rather than a full-width bar,
+          transparent at the very top of the landing page and gaining a
+          blurred, bordered background once the visitor scrolls (so it stays
+          legible over whatever art or copy is behind it, without depending on
+          mix-blend-difference always having bright imagery to invert against). */}
+      <div className="fixed top-4 sm:top-6 inset-x-0 z-50 flex justify-center px-4">
+        <nav
+          className={`flex items-center gap-2 rounded-full px-3 py-2.5 transition-all duration-500 ${
+            scrolled || context !== "landing"
+              ? "border border-border bg-background/80 backdrop-blur-xl shadow-[0_1px_0_0] shadow-border/60"
+              : "border border-transparent bg-transparent"
+          }`}
+        >
+          <Link href="/" aria-label="FELT home" className="flex items-center shrink-0 pl-2 pr-1">
+            {/* felt_logo.png is the cropped 540x220 wordmark. The *_white*.png files
+                are 500x500/800x800 squares with the wordmark floating in transparent
+                padding, so any height applied to them shrinks the glyph to nothing.
+                h-7 keeps it legible at capsule scale without overpowering the pill. */}
+            <Image
+              src="/felt_logo.png"
+              alt="FELT"
+              width={120}
+              height={49}
+              priority
+              className="h-7 w-auto select-none"
+            />
+          </Link>
+
+          <div className="hidden md:flex items-center gap-1 text-[11px] font-mono tracking-[0.2em] uppercase">
+            {context === 'landing' ? (
+              <>
+                <a href="#how-it-works" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">How it works</a>
+                <a href="#features" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">Features</a>
+                <a href="#pricing" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">Pricing</a>
+                <a href="#faq" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">FAQ</a>
+              </>
+            ) : (
+              <>
+                <a href="/dashboard" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">Overview</a>
+                <a href="/dashboard/gallery" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">My Art</a>
+              </>
+            )}
+          </div>
+
+          <div className="pl-1">
+            {context === 'landing' ? (
+              <button
                 onClick={() => setAuthOpen(true)}
-                className="px-4 py-2 border border-border rounded-full font-mono text-[12px] tracking-[0.2em] uppercase hover:bg-foreground hover:text-background transition-colors cursor-pointer"
+                className="px-4 py-2 bg-foreground text-background rounded-full font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-accent transition-colors cursor-pointer"
               >
                 Get Started
               </button>
-            </>
-          ) : (
-            <>
-              <a href="/dashboard" className="hover:text-accent transition-colors">Overview</a>
-              <a href="/dashboard/gallery" className="hover:text-accent transition-colors">My Art</a>
-              <button 
+            ) : (
+              <button
                 onClick={handleLogout}
-                className="px-4 py-2 border border-border rounded-full font-mono text-[12px] tracking-[0.2em] uppercase hover:bg-destructive hover:text-white transition-colors cursor-pointer"
+                className="hidden md:inline-block px-4 py-2 border border-border rounded-full font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-destructive hover:text-white hover:border-destructive transition-colors cursor-pointer"
               >
                 Logout
               </button>
-            </>
-          )}
-        </div>
-      </nav>
+            )}
+          </div>
+        </nav>
+      </div>
 
       {/* Mobile Floating Action & Slide Panel */}
       <div className="md:hidden fixed bottom-6 right-6 z-50">
