@@ -66,19 +66,8 @@ export function Hero({ onGetStarted }: HeroProps) {
               Get Started
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
             </button>
-            <a
-              href="#how-it-works"
-              className="group inline-flex items-center gap-2 px-7 py-3.5 border border-border font-mono text-[10px] tracking-[0.2em] uppercase hover:border-accent hover:text-accent transition-colors rounded-full"
-            >
-              <Play className="size-3 fill-current" />
-              See how it works
-            </a>
           </div>
 
-          <div className="flex items-center justify-center lg:justify-start gap-3 font-mono text-[10px] text-muted-foreground tracking-wide">
-            <span className="inline-flex size-1.5 rounded-full bg-accent animate-pulse-bar" />
-            Free to start · no card required
-          </div>
         </div>
 
         {/* Floating artwork stack */}
