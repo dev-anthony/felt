@@ -1,105 +1,103 @@
 "use client"
 
 import * as React from "react"
-import { ArrowRight, Play } from "lucide-react"
-import { ArtTile } from "./art-tile"
+import { ArrowRight } from "lucide-react"
 
 interface HeroProps {
   onGetStarted: () => void
 }
 
-/**
- * Layout inspired by the Qlick reference (large headline, floating artwork,
- * generous whitespace, editorial composition) reinterpreted in FELT's own
- * dark palette rather than copied — "keep FELT branding" per the redesign
- * brief. The floating stack uses the abstract ArtTile gradients (see
- * art-tile.tsx) rather than real screenshots, since no generated-cover assets
- * exist to show honestly.
- */
+const HERO_STACK_ITEMS = [
+  { label: "Primal", imageUrl: "/download (10).jpg" },
+  { label: "Nostalgic", imageUrl: "/download (17).jpg" },
+  { label: "Euphoric", imageUrl: "/image.png" },
+  { label: "Cerebral", gradient: "bg-gradient-to-br from-[#232323] via-[#3a3f42] to-[#111214]" },
+]
+
 export function Hero({ onGetStarted }: HeroProps) {
-  const stackRef = React.useRef<HTMLDivElement>(null)
-  const [tilt, setTilt] = React.useState({ x: 0, y: 0 })
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = stackRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const px = (e.clientX - rect.left) / rect.width - 0.5
-    const py = (e.clientY - rect.top) / rect.height - 0.5
-    setTilt({ x: px * 8, y: py * -8 })
-  }
-  const resetTilt = () => setTilt({ x: 0, y: 0 })
-
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-20 px-6 overflow-hidden">
-      {/* Subtle background grid, referenced by both moodboards */}
-      <div
-        className="absolute inset-0 z-0 opacity-[0.35] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_35%,black,transparent)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, var(--color-border) 1px, transparent 1px), linear-gradient(to bottom, var(--color-border) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-        }}
-        aria-hidden="true"
-      />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60vw] h-[40vh] bg-accent/10 blur-[160px] rounded-full" aria-hidden="true" />
+    <section className="relative h-[100dvh] flex flex-col items-center justify-center px-6 overflow-hidden pt-16 sm:pt-24 pb-8">
+  
 
-      <div className="relative z-10 w-full max-w-6xl grid lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
-        {/* Copy column */}
-        <div className="reveal text-center lg:text-left">
-          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-accent block mb-6">
-            Cover Art, Listened Into Existence
-          </span>
-          <h1 className="font-display italic font-medium text-5xl sm:text-6xl md:text-7xl leading-[1.03] tracking-wide text-balance mb-8">
-            Your music,<br />made visible.
-          </h1>
-          <p className="max-w-lg mx-auto lg:mx-0 text-muted-foreground text-sm sm:text-base leading-relaxed mb-10">
-            Upload a track. FELT listens to its tempo, mood and texture, then builds
-            cover art that feels like the record you actually made — not a generic
-            prompt guess.
-          </p>
+      {/* Centered Content Container */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center text-center h-full justify-center">
+        
+        <h1 className="font-display italic font-medium text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] tracking-wide text-balance mb-4 sm:mb-6 mt-auto pt-10">
+          Your music, made visible.
+        </h1>
+        
+        <p className="max-w-xl mx-auto text-muted-foreground text-sm sm:text-base leading-relaxed mb-6 sm:mb-8">
+        FELT is an AI-powered cover art generation platform for musicians and producers.  
+        It analyzes the emotional DNA of your sound, energy, valence, spectral texture, cultural genre, etc. It translates that feeling into a visual. Your music made visible.
+        </p>
 
-          <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-10">
-            <button
-              onClick={onGetStarted}
-              className="group inline-flex items-center gap-2 px-7 py-3.5 bg-foreground text-background font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-accent transition-colors cursor-pointer rounded-full"
-            >
-              Get Started
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-            </button>
-          </div>
-
-        </div>
-
-        {/* Floating artwork stack */}
-        <div
-          ref={stackRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={resetTilt}
-          className="reveal relative aspect-square w-full max-w-md mx-auto [perspective:1200px]"
-          style={{ animationDelay: "150ms" }}
+        <button
+          onClick={onGetStarted}
+          className="group inline-flex items-center gap-2 px-8 py-3.5 sm:py-4 bg-foreground text-background font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-accent transition-colors cursor-pointer rounded-full mb-12 sm:mb-16"
         >
-          <div
-            className="relative w-full h-full transition-transform duration-300 ease-out"
-            style={{ transform: `rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)` }}
-          >
-            <ArtTile
-              palette="nostalgia"
-              label="Warm / Nostalgic"
-              className="absolute inset-x-8 top-10 bottom-16 shadow-2xl shadow-black/50 -rotate-6"
-            />
-            <ArtTile
-              palette="euphoria"
-              label="High Energy"
-              className="absolute inset-x-4 top-4 bottom-20 shadow-2xl shadow-black/50 rotate-3 scale-[1.02]"
-            />
-            <ArtTile
-              palette="cerebral"
-              label="Cerebral"
-              className="absolute inset-x-12 top-16 bottom-8 shadow-2xl shadow-black/60 -rotate-2 translate-y-2"
-            />
-          </div>
+          Get Started
+          <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+        </button>
+
+        {/* Artwork stack forming a straight horizontal line of diamonds */}
+        <div className="reveal w-full flex justify-center mt-auto pb-10" style={{ animationDelay: "150ms" }}>
+          <TiltedImageStack items={HERO_STACK_ITEMS} />
         </div>
+
       </div>
     </section>
   )
+}
+
+export interface StackItem {
+  label: string;
+  imageUrl?: string;
+  gradient?: string; 
+}
+
+export function TiltedImageStack({ items }: { items: StackItem[] }) {
+  return (
+    // Increased gap between cards to give them more breathing room
+    <div className="flex items-center justify-center space-x-6 sm:space-x-6 px-4">
+      {items.map((item, i) => (
+        <div
+          key={item.label}
+          className={`
+            group
+            relative aspect-square w-20 sm:w-28 md:w-36 lg:w-44
+            rounded-xl sm:rounded-2xl overflow-hidden
+            bg-card border-[5px] border-black
+            shadow-2xl shadow-black/50
+            transition-all duration-500 ease-out
+            rotate-29
+            hover:-translate-y-4 hover:z-50
+          `}
+          style={{ 
+            animationDelay: `${i * 90}ms`,
+            zIndex: i 
+          }}
+        >
+          {/* 
+            Inner container counter-rotates by -35deg to match the card rotation,
+            keeping the image upright, scaled to fill the diamond shape seamlessly.
+          */}
+          <div className="absolute inset-0 w-full h-full -rotate-29 scale-[1.35]">
+            {item.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.imageUrl}
+                alt={item.label}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            ) : (
+              <div
+                className={`w-full h-full ${item.gradient ?? "bg-gradient-to-br from-accent/40 via-muted to-secondary"}`}
+                aria-label={item.label}
+              />
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }

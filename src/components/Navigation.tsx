@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -12,11 +12,8 @@ export function Navigation() {
   const { context, setContext } = useNavStore();
   const [isOpen, setIsOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  // Solid/blurred once scrolled past the hero, transparent at the very top —
-  // the previous mix-blend-difference treatment depended on always having
-  // bright imagery directly behind it, which the redesigned hero no longer
-  // guarantees everywhere.
   const [scrolled, setScrolled] = useState(false);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -27,19 +24,12 @@ export function Navigation() {
   const toggleNav = () => setIsOpen(!isOpen);
   const handleLinkClick = () => setIsOpen(false);
 
-  // Real sign-out: hits the backend, clears the refresh timer and routes home.
-  // (This used to only flip local nav state, so the user stayed logged in.)
-  //
-  // Deliberately uses authApi directly rather than useUser(): this component
-  // renders on the landing page, which sits OUTSIDE UserProvider (that provider
-  // only wraps /dashboard). Calling useUser() here throws at runtime.
   const handleLogout = async () => {
     setIsOpen(false);
     setContext('landing');
     try {
       await authApi.logout();
     } catch {
-      // Still clear local session state and get the user home.
       handleGracefulFailoverLogout();
     }
   };
@@ -48,24 +38,17 @@ export function Navigation() {
 
   return (
     <>
-      {/* Desktop Navigation — a floating capsule rather than a full-width bar,
-          transparent at the very top of the landing page and gaining a
-          blurred, bordered background once the visitor scrolls (so it stays
-          legible over whatever art or copy is behind it, without depending on
-          mix-blend-difference always having bright imagery to invert against). */}
-      <div className="fixed top-4 sm:top-6 inset-x-0 z-50 flex justify-center px-4">
+      {/* Desktop Navigation — main background removed, pill links with background kept, explore button hidden on mobile */}
+      <div className="fixed top-4 sm:top-6 inset-x-0 z-50 flex justify-center px-6">
         <nav
-          className={`flex items-center gap-2 rounded-full px-3 py-2.5 transition-all duration-500 ${
+          className={`w-full max-w-6xl flex items-center justify-between px-6 py-3 transition-all duration-500 ${
             scrolled || context !== "landing"
-              ? "border border-border bg-background/80 backdrop-blur-xl shadow-[0_1px_0_0] shadow-border/60"
+              ? "border border-border/60 bg-background/20 backdrop-blur-xl shadow-[0_1px_0_0] shadow-border/40 rounded-full"
               : "border border-transparent bg-transparent"
           }`}
         >
-          <Link href="/" aria-label="FELT home" className="flex items-center shrink-0 pl-2 pr-1">
-            {/* felt_logo.png is the cropped 540x220 wordmark. The *_white*.png files
-                are 500x500/800x800 squares with the wordmark floating in transparent
-                padding, so any height applied to them shrinks the glyph to nothing.
-                h-7 keeps it legible at capsule scale without overpowering the pill. */}
+          {/* Logo on the far left */}
+          <Link href="/" aria-label="FELT home" className="flex items-center shrink-0">
             <Image
               src="/felt_logo.png"
               alt="FELT"
@@ -76,34 +59,37 @@ export function Navigation() {
             />
           </Link>
 
-          <div className="hidden md:flex items-center gap-1 text-[11px] font-mono tracking-[0.2em] uppercase">
+          {/* Centered pill nav links with background */}
+          <div className="hidden md:flex items-center bg-foreground/[0.06] border border-border/50 rounded-full px-4 py-1.5 gap-1 text-[11px] font-mono tracking-[0.2em] uppercase backdrop-blur-md">
             {context === 'landing' ? (
               <>
-                <a href="#how-it-works" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">How it works</a>
-                <a href="#features" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">Features</a>
-                <a href="#pricing" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">Pricing</a>
-                <a href="#faq" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">FAQ</a>
+                <a href="#" className="px-4 py-2 rounded-full bg-foreground text-background font-medium shadow-sm transition-colors">Home</a>
+                <a href="#how-it-works" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">How it works</a>
+                <a href="#features" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">Features</a>
+                <a href="#pricing" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">Pricing</a>
+                <a href="#faq" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">FAQ</a>
               </>
             ) : (
               <>
-                <a href="/dashboard" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">Overview</a>
-                <a href="/dashboard/gallery" className="px-3 py-2 rounded-full hover:bg-foreground/6 hover:text-accent transition-colors">My Art</a>
+                <a href="/dashboard" className="px-4 py-2 rounded-full bg-foreground text-background font-medium shadow-sm transition-colors">Overview</a>
+                <a href="/dashboard/gallery" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">My Art</a>
               </>
             )}
           </div>
 
-          <div className="pl-1">
+          {/* Action button on the far right (Hidden on mobile so only the logo displays) */}
+          <div className="hidden md:flex items-center">
             {context === 'landing' ? (
               <button
                 onClick={() => setAuthOpen(true)}
-                className="px-4 py-2 bg-foreground text-background rounded-full font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-accent transition-colors cursor-pointer"
+                className="px-6 py-2.5 bg-foreground text-background rounded-full font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-accent transition-colors cursor-pointer shadow-md"
               >
-                Get Started
+                Explore
               </button>
             ) : (
               <button
                 onClick={handleLogout}
-                className="hidden md:inline-block px-4 py-2 border border-border rounded-full font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-destructive hover:text-white hover:border-destructive transition-colors cursor-pointer"
+                className="px-5 py-2 border border-border rounded-full font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-destructive hover:text-white hover:border-destructive transition-colors cursor-pointer"
               >
                 Logout
               </button>
@@ -151,7 +137,7 @@ export function Navigation() {
                 <button 
                   onClick={() => { handleLinkClick(); setAuthOpen(true); }} 
                   className={linkClass} 
-                  title="Get Started"
+                  title="Explore"
                 >
                   <ArrowUpRight className="w-5 h-5"/>
                 </button>
