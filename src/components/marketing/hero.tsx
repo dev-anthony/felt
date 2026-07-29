@@ -11,7 +11,7 @@ const HERO_STACK_ITEMS = [
   { label: "Primal", imageUrl: "/download (10).jpg" },
   { label: "Nostalgic", imageUrl: "/download (17).jpg" },
   { label: "Euphoric", imageUrl: "/image.png" },
-  { label: "Cerebral", gradient: "bg-gradient-to-br from-[#232323] via-[#3a3f42] to-[#111214]" },
+  { label: "Cerebral", gradient: "imageUrl: /tems.jpg" },
 ]
 
 export function Hero({ onGetStarted }: HeroProps) {
