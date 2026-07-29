@@ -43,8 +43,8 @@ export function Navigation() {
         <nav
           className={`w-full max-w-6xl flex items-center justify-between px-6 py-3 transition-all duration-500 ${
             scrolled || context !== "landing"
-              ? "border border-border/60 bg-background/20 backdrop-blur-xl shadow-[0_1px_0_0] shadow-border/40 rounded-full"
-              : "border border-transparent bg-transparent"
+              ? "border border-border/60 rounded-full"
+              : "border border-transparent "
           }`}
         >
           {/* Logo on the far left */}
@@ -60,10 +60,10 @@ export function Navigation() {
           </Link>
 
           {/* Centered pill nav links with background */}
-          <div className="hidden md:flex items-center bg-foreground/[0.06] border border-border/50 rounded-full px-4 py-1.5 gap-1 text-[11px] font-mono tracking-[0.2em] uppercase backdrop-blur-md">
+          <div className="hidden md:flex items-center border border-border/50 rounded-full px-4 py-1.5 gap-1 text-[11px] font-mono tracking-[0.2em] uppercase backdrop-blur-md">
             {context === 'landing' ? (
               <>
-                <a href="#" className="px-4 py-2 rounded-full bg-foreground text-background font-medium shadow-sm transition-colors">Home</a>
+                <a href="#" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">Home</a>
                 <a href="#how-it-works" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">How it works</a>
                 <a href="#features" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">Features</a>
                 <a href="#pricing" className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors">Pricing</a>
