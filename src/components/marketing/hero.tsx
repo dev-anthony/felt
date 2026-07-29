@@ -58,7 +58,7 @@ export interface StackItem {
 export function TiltedImageStack({ items }: { items: StackItem[] }) {
   return (
     // Increased gap between cards to give them more breathing room
-    <div className="flex items-center justify-center space-x-6 sm:space-x-6 px-4">
+    <div className="flex items-center justify-center space-x-3 sm:space-x-6 px-4">
       {items.map((item, i) => (
         <div
           key={item.label}
