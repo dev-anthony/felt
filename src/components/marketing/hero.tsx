@@ -16,7 +16,7 @@ const HERO_STACK_ITEMS = [
 
 export function Hero({ onGetStarted }: HeroProps) {
   return (
-    <section className="relative h-[100dvh] flex flex-col items-center justify-center px-6 overflow-hidden pt-16 sm:pt-24 pb-8">
+    <section className="relative h-[100dvh] flex flex-col items-center justify-center px-6 overflow-hidden pt-20 sm:pt-24 pb-8">
   
 
       {/* Centered Content Container */}
@@ -55,32 +55,34 @@ export interface StackItem {
   gradient?: string; 
 }
 
+
+
 export function TiltedImageStack({ items }: { items: StackItem[] }) {
   return (
-    // Increased gap between cards to give them more breathing room
-    <div className="flex items-center justify-center space-x-3 sm:space-x-6 px-4">
+    // 1. Removed `max-w-[100vw]` and `overflow-x-auto` to fix the responsive x-axis scrolling bug.
+    <div className="flex items-center justify-center -space-x-24 sm:space-x-6 px-4 w-full pb-10 pt-10">
       {items.map((item, i) => (
         <div
           key={item.label}
           className={`
             group
-            relative aspect-square w-20 sm:w-28 md:w-36 lg:w-44
+            relative aspect-square 
+            shrink-0 w-40 sm:w-40 lg:w-44
             rounded-xl sm:rounded-2xl overflow-hidden
             bg-card border-[5px] border-black
             shadow-2xl shadow-black/50
             transition-all duration-500 ease-out
             rotate-29
-            hover:-translate-y-4 hover:z-50
+            hover:-translate-y-4 hover:!z-50 /* Added ! to force this above the inline z-index on hover */
           `}
           style={{ 
             animationDelay: `${i * 90}ms`,
-            zIndex: i 
+            // 2. Reversed the z-index! Now the first item (left) is on top, 
+            // and the remaining items stack behind it.
+            zIndex: items.length - i 
           }}
         >
-          {/* 
-            Inner container counter-rotates by -35deg to match the card rotation,
-            keeping the image upright, scaled to fill the diamond shape seamlessly.
-          */}
+          {/* Inner counter-rotation wrapper */}
           <div className="absolute inset-0 w-full h-full -rotate-29 scale-[1.35]">
             {item.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
