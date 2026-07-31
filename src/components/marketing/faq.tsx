@@ -6,24 +6,24 @@ import { Reveal } from "./reveal"
 
 const FAQS = [
   {
-    q: "What audio formats does FELT accept?",
-    a: "MP3 and WAV, up to 20MB per track. Both full songs with vocals and instrumental beats are supported through separate pipelines.",
+    q: "What audio formats can I upload?",
+    a: "We accept MP3 and WAV files up to 20MB. Full vocal tracks and instrumental beats both work using dedicated processing pipelines.",
   },
   {
-    q: "Does FELT use my lyrics?",
-    a: "For vocal tracks, yes — FELT looks up the lyrics first, transcribing directly from the audio only if that lookup fails. Lyric meaning is combined with the audio's emotional read, and if the two genuinely disagree, both are held in tension rather than one silently overriding the other.",
+    q: "How are lyrics used during generation?",
+    a: "For tracks with vocals, the system transcribes the lyrics directly from the audio. We combine lyric themes with the audio's emotional profile so both influence the final image.",
   },
   {
-    q: "Can I guide the result?",
-    a: "Yes. Beyond the one-sentence description every upload includes, you can optionally select a specific feeling from a researched vocabulary of over a hundred emotions, and/or upload a reference image for the cover to draw its composition and palette from.",
+    q: "Can I guide the visual direction?",
+    a: "Yes. You can add a short context note, select specific emotions from our vocabulary list, or upload a reference image to steer color and composition.",
   },
   {
-    q: "Is every cover actually different, or just recoloured?",
-    a: "Different. The camera, lens, lighting, composition and technique are all selected from the track's own measured features — two songs in the same genre with different tempo or brightness resolve to different visual decisions, not the same template restyled.",
+    q: "Does each track get a unique artwork layout?",
+    a: "Yes. Camera selection, lens choices, lighting, and composition derive straight from your track's audio profile. Two songs in the same genre will resolve to different visual parameters.",
   },
   {
-    q: "What does the ₦2,000 plan include?",
-    a: "Unlimited generations, the full emotional analysis engine, reference-image conditioning and lyric-aware generation for vocal tracks. There are no separate tiers to choose between.",
+    q: "What is included in the ₦2,000 monthly plan?",
+    a: "You get unlimited generation runs, full audio analysis access, reference image uploading, and lyric processing on vocal tracks.",
   },
 ]
 
@@ -38,7 +38,7 @@ export function FAQ() {
             Questions
           </span>
           <h2 className="font-display text-3xl md:text-4xl italic font-medium tracking-tight">
-            Frequently asked.
+            Frequently asked questions
           </h2>
         </Reveal>
 

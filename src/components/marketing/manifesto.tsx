@@ -16,12 +16,11 @@ export function Manifesto() {
           The founding idea
         </span>
         <p className="font-display italic font-medium text-3xl sm:text-4xl md:text-5xl leading-tight tracking-tight text-balance">
-          Feeling is primary.<br />Sound is the vehicle.
+          Feeling is primary.<br />Sound is the base.
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto pt-2">
           Every track feels like something before it means anything. FELT was built to
-          catch that feeling directly from the audio — not from a text box asking you
-          to describe your own music back to yourself.
+          catch that emotion directly from the audio, and creates a cover art from that feeling.
         </p>
       </Reveal>
     </section>

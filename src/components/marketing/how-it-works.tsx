@@ -9,20 +9,14 @@ interface Step {
 }
 
 const STEPS: Step[] = [
-  { icon: Upload, title: "Upload", copy: "Drop an MP3 or WAV — a full song or an instrumental beat." },
-  { icon: AudioWaveform, title: "Analyse", copy: "Tempo, energy, key and texture are read directly from the audio." },
-  { icon: Dna, title: "Visual DNA", copy: "Those signals route to one of twelve emotional archetypes and a matching photographic direction." },
-  { icon: ImageIcon, title: "Artwork", copy: "A cover is generated to match — real photographic language, not a generic AI look." },
-  { icon: Video, title: "Motion", copy: "Beat-synced video export.", inDevelopment: true },
-  { icon: Download, title: "Export", copy: "Download your cover in the sizes each platform actually needs." },
+  { icon: Upload, title: "Upload", copy: "Drop in an MP3 or WAV file, whether it's a finished mix or a raw instrumental beat." },
+  { icon: AudioWaveform, title: "Analyse", copy: "Essentia extracts tempo, key signature, dynamic energy, and frequency balance straight from the waveform." },
+  { icon: Dna, title: "Visual DNA", copy: "Those metrics route into one of twelve emotional archetypes to set the camera and lighting parameters." },
+  { icon: ImageIcon, title: "Artwork", copy: "Your cover generates using real photographic rules, avoiding that washed-out AI look entirely." },
+  { icon: Video, title: "Motion", copy: "Beat-synced video loops for visualizers and canvas.", inDevelopment: true },
+  { icon: Download, title: "Export", copy: "Grab your artwork ready-formatted for Spotify, Apple Music, and social feeds." },
 ]
 
-/**
- * Six-step version, not the five the roadmap sketched — the Motion step is
- * kept visible (so the workflow reads honestly, start to finish) but marked
- * "In development" rather than presented as shipping today. See
- * FRONTEND-ROADMAP.md Task 2, deferred pending a real rendering pipeline.
- */
 export function HowItWorks() {
   return (
     <section id="how-it-works" className="py-24 px-6 border-t border-border">
@@ -32,7 +26,7 @@ export function HowItWorks() {
             How FELT works
           </span>
           <h2 className="font-display text-3xl md:text-4xl italic font-medium tracking-tight">
-            From a track to a cover, in one pass.
+            From audio track to album art in one pass
           </h2>
         </Reveal>
 

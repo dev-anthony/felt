@@ -2,40 +2,38 @@ import { BrainCircuit, Fingerprint, Camera, ImageUp, Shapes, Palette } from "luc
 import { Reveal } from "./reveal"
 
 /**
- * Six real, shipped capabilities — deliberately not eight or ten. Padding this
- * out with the video generator or album packaging would misrepresent features
- * that don't exist yet as live.
+ * Six real, shipped capabilities. No filler, no vaporware.
  */
 const FEATURES = [
   {
     icon: BrainCircuit,
     title: "Sonic analysis",
-    copy: "Tempo, energy, valence, brightness and key are extracted directly from the waveform — on-device, before anything is generated.",
+    copy: "We strip down your audio before touching a prompt, reading everything from vocal tone to spectral texture.",
   },
   {
     icon: Fingerprint,
     title: "Visual DNA engine",
-    copy: "Twelve emotional archetypes, each calibrated against a published dataset of 1,802 human-rated songs — not a hand-tuned guess.",
+    copy: "Twelve core emotional archetypes mapped against a dataset of 1,802 human-rated tracks. Real music psychology, zero guessing.",
   },
   {
     icon: Camera,
-    title: "Real photographic direction",
-    copy: "Camera, lens, film stock and lighting are chosen deterministically from the music, then held to a believability pass that fights the generic-AI-art look.",
+    title: "Photographic direction",
+    copy: "Camera setup, lens choice, film stock, and lighting map directly to your track's energy. No generic AI render look.",
   },
   {
     icon: ImageUp,
     title: "Reference images",
-    copy: "Upload a photo, moodboard crop or press shot. FELT draws composition and palette from it without simply copying the content.",
+    copy: "Drop in a photo, moodboard snippet, or press shot. FELT pulls composition and color without copy-pasting the image.",
   },
   {
     icon: Shapes,
     title: "Symbol library",
-    copy: "A researched vocabulary of visual metaphors — not just a colour palette — staged differently depending on the mood of the track.",
+    copy: "A targeted vocabulary of visual metaphors that shift and react depending on the underlying mood of your track.",
   },
   {
     icon: Palette,
     title: "Medium routing",
-    copy: "Photography, illustration or CGI — chosen from the track's own texture, not defaulted to one look for everything.",
+    copy: "Photography, analog illustration, or 3D render. The sound dictates the medium instead of defaulting to one style.",
   },
 ]
 
@@ -45,10 +43,10 @@ export function FeatureCards() {
       <div className="max-w-6xl mx-auto">
         <Reveal className="mb-16 max-w-xl">
           <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-accent mb-3 block">
-            Under the hood
+            Features
           </span>
           <h2 className="font-display text-3xl md:text-4xl italic font-medium tracking-tight">
-            A real engine, not a prompt wrapper.
+            The tech behind the art
           </h2>
         </Reveal>
 

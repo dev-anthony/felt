@@ -55,38 +55,10 @@ export default function Index() {
       <Navigation />
 
       <Hero onGetStarted={openAuth} />
-      <GroundedIn />
-      <HowItWorks />
       <FeatureCards />
+      <HowItWorks />
+      
 
-      <Showcase
-        eyebrow="The Visual DNA Engine"
-        title="Twelve emotional archetypes, not one generic mood."
-        copy="Every track is scored against twelve distinct emotional archetypes — from euphoria to melancholy to cerebral detachment — each calibrated against real, published listener data rather than an intuitive guess."
-        points={[
-          "Anchors calibrated against DEAM's 1,802 human-rated songs",
-          "Aesthetic state (Normal / Luxury / Gritty) read from the track's own texture",
-          "A visual direction distilled from the archetype, not chosen at random",
-        ]}
-        palette="cerebral"
-        tileLabel="Visual DNA"
-      />
-
-      <Showcase
-        reverse
-        eyebrow="Music analysis"
-        title="Reads the track. Doesn't ask you to describe it."
-        copy="Tempo, energy, brightness, key and texture are extracted directly from the audio waveform. An artist's own words still matter — they correct the read when the two genuinely disagree, rather than being ignored."
-        points={[
-          "On-device feature extraction — nothing about your unreleased track leaves silently",
-          "Lyrics factored in for vocal tracks, with lyric meaning and audio mood held in tension rather than one overriding the other",
-          "An optional reference image lets you steer composition and palette directly",
-        ]}
-        palette="nostalgia"
-        tileLabel="Sonic Analysis"
-      />
-
-      <WhatsNext />
       <Manifesto />
       <Pricing onGetStarted={openAuth} />
       <FAQ />
