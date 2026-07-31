@@ -16,9 +16,10 @@ const HERO_STACK_ITEMS = [
 
 export function Hero({ onGetStarted }: HeroProps) {
   return (
-    <section className="relative h-[100dvh] flex flex-col items-center justify-center px-6 overflow-hidden pt-20 sm:pt-24 pb-8">
+    // 1. Changed to min-h-[100dvh] so it doesn't squish on short screens.
+    // 2. Increased pt-20 to pt-32 (and sm:pt-40) to give the navbar plenty of breathing room.
+    <section className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 overflow-hidden pt-28 sm:pt-30 pb-6">
   
-
       {/* Centered Content Container */}
       <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center text-center h-full justify-center">
         
