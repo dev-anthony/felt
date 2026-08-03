@@ -557,7 +557,7 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
   }
 
   return (
-    <div className="w-full bg-[#121212] flex flex-col relative overflow-x-hidden min-w-0">
+    <div className="w-full bg-[#141414] flex flex-col relative overflow-x-hidden min-w-0">
       <div className="h-1 bg-foreground/5 w-full relative overflow-hidden shrink-0">
         <div
           className="h-full bg-accent transition-all duration-300"
@@ -570,154 +570,162 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
         />
       </div>
 
-      <form onSubmit={handleProceed} className="p-5 sm:p-6 flex-1 flex flex-col justify-center min-w-0 w-full overflow-x-hidden">
+      <form onSubmit={handleProceed} className="p-6 sm:p-8 flex-1 flex flex-col justify-center min-w-0 w-full overflow-x-hidden">
         {currentStep === "UPLOAD" && (
-          <div className="space-y-5 w-full min-w-0">
-            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-6 md:gap-8 items-start">
-              {/* Left: the source — what you're feeding the engine. */}
-              <div className="space-y-3 min-w-0">
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block">
-                  {"// Source"}
-                </span>
-
-                <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-background border border-border/40 shrink-0">
+          <div className="space-y-6 w-full min-w-0">
+            {/* Track type — two selectable cards, not a thin segmented toggle,
+                so the choice reads as a real decision. */}
+            <div className="grid grid-cols-2 gap-3">
+              {(
+                [
+                  { value: "vocal" as const, Icon: Music, label: "Vocals / Song", hint: "Has lyrics or vocals" },
+                  { value: "instrumental" as const, Icon: Disc, label: "Instrumental / Beat", hint: "No vocals, just the beat" },
+                ]
+              ).map(({ value, Icon, label, hint }) => {
+                const selected = trackType === value
+                return (
                   <button
+                    key={value}
                     type="button"
                     disabled={isUploading}
-                    onClick={() => setTrackType("vocal")}
-                    className={`flex items-center justify-center gap-2 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors ${
-                      trackType === "vocal" ? "bg-[#1c1c1c] text-foreground" : "text-muted-foreground hover:text-foreground"
+                    onClick={() => setTrackType(value)}
+                    className={`relative text-left rounded-2xl border p-4 transition-colors min-w-0 ${
+                      selected
+                        ? "border-accent/60 bg-accent/[0.06]"
+                        : "border-border/40 hover:border-border/70 bg-background/40"
                     }`}
                   >
-                    <Music className="size-3.5" /> Vocals / Song
+                    <div className="flex items-center justify-between mb-3">
+                      <Icon className={`size-4 ${selected ? "text-accent" : "text-muted-foreground"}`} />
+                      <span
+                        className={`flex items-center justify-center size-4 rounded-full border transition-colors shrink-0 ${
+                          selected ? "bg-foreground border-foreground text-background" : "border-border/50 text-transparent"
+                        }`}
+                      >
+                        <Check className="size-2.5" strokeWidth={3} />
+                      </span>
+                    </div>
+                    <p className="font-sans text-sm text-foreground font-medium truncate">{label}</p>
+                    <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mt-0.5 truncate">{hint}</p>
                   </button>
-                  <button
-                    type="button"
-                    disabled={isUploading}
-                    onClick={() => setTrackType("instrumental")}
-                    className={`flex items-center justify-center gap-2 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors ${
-                      trackType === "instrumental" ? "bg-[#1c1c1c] text-foreground" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <Disc className="size-3.5" /> Beat
-                  </button>
-                </div>
-
-                <div
-                  onDragOver={(e) => { e.preventDefault(); if (!isUploading) setIsDragging(true) }}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={(e) => {
-                    e.preventDefault()
-                    setIsDragging(false)
-                    if (!isUploading && e.dataTransfer.files?.[0]) processAudioFile(e.dataTransfer.files[0])
-                  }}
-                  className={`rounded-xl border border-dashed p-6 text-center flex flex-col items-center justify-center relative min-h-[160px] md:min-h-[220px] min-w-0 w-full transition-colors ${
-                    isDragging ? "border-accent bg-foreground/[0.02]" : "border-border/60"
-                  }`}
-                >
-                  <input
-                    type="file"
-                    id="audio-upload-input"
-                    accept=".mp3,.wav"
-                    disabled={isUploading}
-                    className="hidden"
-                    onChange={(e) => { if (e.target.files?.[0]) processAudioFile(e.target.files[0]) }}
-                  />
-                  <label htmlFor="audio-upload-input" className="cursor-pointer w-full h-full flex flex-col items-center justify-center min-w-0">
-                    <Upload className={`size-6 mb-2.5 ${file ? "text-accent" : "text-muted-foreground/60"}`} />
-                    {file ? (
-                      <div className="space-y-1 w-full min-w-0 px-2">
-                        <p className="font-sans text-xs text-foreground font-medium max-w-full truncate mx-auto">{file.name}</p>
-                      </div>
-                    ) : (
-                      <p className="font-sans text-xs text-foreground">
-                        Drag & drop your file or <span className="text-accent underline">browse</span>
-                      </p>
-                    )}
-                  </label>
-                </div>
-
-                {errorMessage && (
-                  <p className="font-mono text-[10px] text-destructive break-words">{errorMessage}</p>
-                )}
-              </div>
-
-              {/* Right: the brief — what the cover should be about. */}
-              <div className="space-y-3 min-w-0">
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent block">
-                  {"// Details"}
-                </span>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="wizard-track-title" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Track Title</label>
-                  <Input
-                    id="wizard-track-title"
-                    placeholder="Title..."
-                    value={title}
-                    disabled={isUploading}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    className="rounded-xl bg-background border-border/40 text-sm"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="wizard-artist-name" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Artist Name <span className="normal-case text-muted-foreground/50">(optional — helps us find lyrics for covers/released songs)</span>
-                  </label>
-                  <Input
-                    id="wizard-artist-name"
-                    placeholder="e.g. The Weeknd"
-                    value={artistName}
-                    disabled={isUploading}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    className="rounded-xl bg-background border-border/40 text-sm"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="wizard-prompt" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">What is this song about in one sentence?</label>
-                  <Input
-                    id="wizard-prompt"
-                    placeholder="E.g., an existential confession about running out of time over neon synths..."
-                    value={prompt}
-                    disabled={isUploading}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    required
-                    className="rounded-xl bg-background border-border/40 text-sm"
-                  />
-                </div>
-
-                <EmotionPicker
-                  value={declaredEmotion}
-                  onChange={setDeclaredEmotion}
-                  disabled={isUploading}
-                />
-
-                <ReferenceImagePicker
-                  value={referenceImageB64}
-                  onChange={setReferenceImageB64}
-                  creativeStrength={creativeStrength}
-                  onCreativeStrengthChange={setCreativeStrength}
-                  disabled={isUploading}
-                />
-              </div>
+                )
+              })}
             </div>
 
-            <div className="pt-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-border/20 mt-2 shrink-0">
+            {/* Source file */}
+            <div
+              onDragOver={(e) => { e.preventDefault(); if (!isUploading) setIsDragging(true) }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setIsDragging(false)
+                if (!isUploading && e.dataTransfer.files?.[0]) processAudioFile(e.dataTransfer.files[0])
+              }}
+              className={`rounded-2xl border border-dashed p-8 text-center flex flex-col items-center justify-center relative min-h-[140px] min-w-0 w-full transition-colors ${
+                isDragging ? "border-accent bg-foreground/[0.02]" : "border-border/60"
+              }`}
+            >
+              <input
+                type="file"
+                id="audio-upload-input"
+                accept=".mp3,.wav"
+                disabled={isUploading}
+                className="hidden"
+                onChange={(e) => { if (e.target.files?.[0]) processAudioFile(e.target.files[0]) }}
+              />
+              <label htmlFor="audio-upload-input" className="cursor-pointer w-full h-full flex flex-col items-center justify-center min-w-0">
+                <Upload className={`size-6 mb-2.5 ${file ? "text-accent" : "text-muted-foreground/60"}`} />
+                {file ? (
+                  <div className="space-y-1 w-full min-w-0 px-2">
+                    <p className="font-sans text-xs text-foreground font-medium max-w-full truncate mx-auto">{file.name}</p>
+                  </div>
+                ) : (
+                  <p className="font-sans text-xs text-foreground">
+                    Drag & drop your file or <span className="text-accent underline">browse</span>
+                  </p>
+                )}
+              </label>
+            </div>
+
+            {errorMessage && (
+              <p className="font-mono text-[10px] text-destructive break-words -mt-3">{errorMessage}</p>
+            )}
+
+            <div className="h-px bg-border/15 w-full" />
+
+            {/* Brief */}
+            <div className="space-y-5 min-w-0">
+              <div className="space-y-1.5">
+                <label htmlFor="wizard-track-title" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Track Title</label>
+                <Input
+                  id="wizard-track-title"
+                  placeholder="Title..."
+                  value={title}
+                  disabled={isUploading}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  className="rounded-2xl bg-background border-border/40 text-sm h-11"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="wizard-artist-name" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Artist Name <span className="normal-case text-muted-foreground/50">(optional — helps us find lyrics for covers/released songs)</span>
+                </label>
+                <Input
+                  id="wizard-artist-name"
+                  placeholder="e.g. The Weeknd"
+                  value={artistName}
+                  disabled={isUploading}
+                  onChange={(e) => setArtistName(e.target.value)}
+                  className="rounded-2xl bg-background border-border/40 text-sm h-11"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="wizard-prompt" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">What is this song about in one sentence?</label>
+                <Input
+                  id="wizard-prompt"
+                  placeholder="E.g., an existential confession about running out of time over neon synths..."
+                  value={prompt}
+                  disabled={isUploading}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  required
+                  className="rounded-2xl bg-background border-border/40 text-sm h-11"
+                />
+              </div>
+
+              <EmotionPicker
+                value={declaredEmotion}
+                onChange={setDeclaredEmotion}
+                disabled={isUploading}
+              />
+
+              <ReferenceImagePicker
+                value={referenceImageB64}
+                onChange={setReferenceImageB64}
+                creativeStrength={creativeStrength}
+                onCreativeStrengthChange={setCreativeStrength}
+                disabled={isUploading}
+              />
+            </div>
+
+            <div className="h-px bg-border/15 w-full" />
+
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
               <Button
                 type="button"
                 variant="ghost"
                 disabled={isUploading}
                 onClick={onClose}
-                className="font-mono text-[10px] tracking-widest uppercase rounded-full h-9 px-4 shrink-0"
+                className="font-mono text-[10px] tracking-widest uppercase rounded-full h-11 px-5 shrink-0 border border-border/50"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={!file || !title || !prompt || isUploading}
-                className="font-mono text-[10px] tracking-widest uppercase rounded-full bg-foreground text-background h-9 px-4 min-w-0"
+                className="font-mono text-[10px] tracking-widest uppercase rounded-full bg-foreground text-background h-11 px-6 min-w-0"
               >
                 {isUploading ? (
                   <>
@@ -780,4 +788,6 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
           />
         )}
       </form>
-    </div>
+    </div>
+  )
+}

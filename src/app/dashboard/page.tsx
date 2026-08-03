@@ -223,7 +223,7 @@ export default function DashboardPage() {
           <DialogContent
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
-            className="w-[calc(100vw-2rem)] max-w-3xl max-h-[90dvh] overflow-y-auto scrollbar-custom bg-[#121212] border border-border/40 text-foreground p-0 rounded-3xl sm:w-full"
+            className="w-[calc(100vw-2rem)] max-w-xl max-h-[90dvh] overflow-y-auto scrollbar-custom bg-[#141414] border border-border/40 text-foreground p-0 rounded-3xl shadow-2xl shadow-black/50 sm:w-full"
           >
             <DialogHeader className="sr-only">
               <DialogTitle>Acoustic Synthesis Canvas</DialogTitle>
