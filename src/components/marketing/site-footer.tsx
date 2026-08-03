@@ -24,7 +24,7 @@ const SOCIAL_LINKS = [
   },
   { 
     label: "Facebook", 
-    href: "https://www.facebook.com/share/163SpgMoxS6/", // Swap this with your actual Facebook URL
+    href: "https://www.facebook.com/share/163SpgMoxS6/", 
     icon: (
       <svg className="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="1.5">
         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
@@ -33,7 +33,7 @@ const SOCIAL_LINKS = [
   },
   { 
     label: "LinkedIn", 
-    href: "https://www.linkedin.com/in/anthony-joseph-51b69a328?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app", // Swap this with your actual LinkedIn URL
+    href: "https://www.linkedin.com/in/anthony-joseph-51b69a328?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
     icon: (
       <svg className="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="1.5">
         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
@@ -48,62 +48,76 @@ export function SiteFooter() {
   return (
     <footer className="py-16 px-6 border-t border-border">
       <div className="max-w-6xl mx-auto">
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+        
+        {/* 5-Column Grid for Brand, Links, Support, Legal, Socials */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-14">
           
           {/* Column 1: Brand */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:col-span-1">
             <Image 
               src="/felt_logo.png" 
               alt="FELT" 
               width={120} 
-              height={49} 
+              height={79} 
               className="h-8 w-auto select-none" 
             />
-            <p className="font-display italic text-xs text-muted-foreground leading-relaxed max-w-xs">
+            <p className="font-display italic text-[16px] text-muted-foreground leading-relaxed max-w-xs">
             Your music made visible
             </p>
           </div>
 
-          {/* Column 2: Support & Contact */}
+          {/* Column 2: Links */}
+          <div>
+            <h4 className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground/60 mb-4">
+              Links
+            </h4>
+            <ul className="space-y-2.5">
+              <li>
+                <Link href="/#features" className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                  Features
+                </Link>
+              </li>
+              <li>
+                <Link href="/#pricing" className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                  Pricing
+                </Link>
+                
+              </li>
+              <li>
+<Link href="/#how-it-works" className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                 How it Works
+                </Link>
+
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Support */}
           <div>
             <h4 className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground/60 mb-4">
               Support
             </h4>
-            <div className="space-y-2.5">
-              <a 
-                href="mailto:support@mail.usefelt.online" 
-                className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-accent transition-colors break-all"
-              >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                support@mail.usefelt.online
-              </a>
-              <p className="text-[11px] text-muted-foreground/60">
-                Response time: Within 24 hours
-              </p>
-            </div>
-          </div>
-
-          {/* Column 3: Socials */}
-          <div>
-            <h4 className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground/60 mb-4">
-              Connect
-            </h4>
             <ul className="space-y-2.5">
-              {SOCIAL_LINKS.map((s) => (
-                <li key={s.label}>
-                  <a 
-                    href={s.href} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-accent transition-colors"
-                  >
-                    {s.icon}
-                    {s.label}
-                  </a>
-                </li>
-              ))}
+              <li>
+                <Link href="/about" className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                  About
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:support@mail.usefelt.online" className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                  Contact
+                </a>
+              </li>
+              <li>
+                <Link href="/donate" className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                  Donate
+                </Link>
+              </li>
+              <li>
+                <Link href="#faq" className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                  FAQ
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -126,10 +140,30 @@ export function SiteFooter() {
             </ul>
           </div>
 
+          <div>
+            <h4 className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground/60 mb-4">
+              Connect
+            </h4>
+            <ul className="space-y-2.5">
+              {SOCIAL_LINKS.map((s) => (
+                <li key={s.label}>
+                  <a 
+                    href={s.href} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-accent transition-colors"
+                  >
+                    {s.icon}
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
           <div className="flex flex-wrap justify-center gap-6 font-mono text-[8px] tracking-[0.3em] uppercase text-muted-foreground/60">
             <span>Felt</span>
             <span className="flex items-center gap-1.5 normal-case tracking-normal text-[8px]">
