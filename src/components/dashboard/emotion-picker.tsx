@@ -133,7 +133,7 @@ export function EmotionPicker({ value, onChange, disabled }: EmotionPickerProps)
             />
           </div>
 
-          <div className="max-h-[280px] overflow-y-auto overscroll-contain">
+          <div className="max-h-[280px] overflow-y-auto overscroll-contain scrollbar-custom">
             {filtered.length === 0 && (
               <p className="font-mono text-[11px] text-muted-foreground p-3">
                 Nothing matches that. Try a broader word.

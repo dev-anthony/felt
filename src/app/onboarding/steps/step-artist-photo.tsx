@@ -83,7 +83,7 @@ export function StepArtistPhoto({ initialValue, onProceed }: StepArtistPhotoProp
           type="button"
           disabled={!file}
           onClick={() => onProceed({ photo: file })}
-          className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all w-full sm:w-auto"
+          className="font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all w-full sm:w-auto"
         >
           Lock Profile & Continue →
         </Button>

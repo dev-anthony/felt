@@ -18,7 +18,7 @@ export function GroundedIn() {
         <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-muted-foreground/70 mb-8">
           Built on music cognition research
         </p>
-        <div className="grid grid-cols-2 md:md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {FOUNDATIONS.map((f) => (
             <div key={f.label} className="space-y-1">
               <div className="font-display italic text-lg text-foreground/80">{f.label}</div>

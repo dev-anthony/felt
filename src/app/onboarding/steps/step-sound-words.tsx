@@ -38,7 +38,7 @@ export function StepSoundWords({ initialValues, onProceed, onBack }: StepSoundWo
               value={word}
               onChange={(e) => handleInputChange(i, e.target.value)}
               maxLength={18}
-              className="rounded-none bg-background border-border/40 text-sm font-mono tracking-wider focus-visible:border-accent uppercase h-10"
+              className="rounded-xl bg-background border-border/40 text-sm font-mono tracking-wider focus-visible:border-accent uppercase h-10"
             />
           </div>
         ))}
@@ -49,7 +49,7 @@ export function StepSoundWords({ initialValues, onProceed, onBack }: StepSoundWo
           type="button"
           variant="ghost"
           onClick={onBack}
-          className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4"
+          className="font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-4"
         >
           ← Back
         </Button>
@@ -57,7 +57,7 @@ export function StepSoundWords({ initialValues, onProceed, onBack }: StepSoundWo
           type="button"
           disabled={!isValid}
           onClick={() => onProceed({ soundWords: words })}
-          className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
+          className="font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
         >
           Map Coordinates →
         </Button>

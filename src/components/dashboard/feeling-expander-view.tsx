@@ -102,7 +102,7 @@ export function FeelingExpanderView({
           <h3 className="font-display italic text-xl sm:text-2xl text-foreground truncate w-full">Aesthetic Synthesis</h3>
         </div>
 
-        <div className="w-full max-w-full min-w-0 border border-border/40 bg-background/50 p-3 space-y-3 relative rounded-none box-border">
+        <div className="w-full max-w-full min-w-0 border border-border/40 bg-background/50 p-3 space-y-3 relative rounded-2xl box-border">
           <div className="w-full min-w-0">
             <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground block">
               You said:
@@ -133,7 +133,7 @@ export function FeelingExpanderView({
                   type="button"
                   variant="outline"
                   onClick={() => fetchExpansion(true)}
-                  className="font-mono text-[9px] uppercase tracking-widest rounded-none h-8 px-3 border-border/40"
+                  className="font-mono text-[9px] uppercase tracking-widest rounded-full h-8 px-3 border-border/40"
                 >
                   <RotateCcw className="mr-1 size-3" /> Try again
                 </Button>
@@ -143,12 +143,12 @@ export function FeelingExpanderView({
                 <Textarea
                   value={expandedText}
                   onChange={(e) => setExpandedText(e.target.value)}
-                  className="h-[120px] sm:h-[140px] w-full bg-background/80 border border-accent/40 focus-visible:border-accent p-3 font-sans text-xs text-foreground leading-relaxed rounded-none resize-none focus-visible:ring-0 focus-visible:ring-offset-0 box-border overflow-y-auto scrollbar-custom"
+                  className="h-[120px] sm:h-[140px] w-full bg-background/80 border border-accent/40 focus-visible:border-accent p-3 font-sans text-xs text-foreground leading-relaxed rounded-xl resize-none focus-visible:ring-0 focus-visible:ring-offset-0 box-border overflow-y-auto scrollbar-custom"
                 />
                 <Button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="font-mono text-[9px] uppercase tracking-widest rounded-none h-8 px-3 self-end bg-accent text-background hover:bg-accent/90 shrink-0"
+                  className="font-mono text-[9px] uppercase tracking-widest rounded-full h-8 px-3 self-end bg-accent text-background hover:bg-accent/90 shrink-0"
                 >
                   <Save className="mr-1 size-3" /> Save Changes
                 </Button>
@@ -172,7 +172,7 @@ export function FeelingExpanderView({
             variant="outline"
             onClick={handleStartOver}
             disabled={isLoading}
-            className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-none h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto border-border/40 truncate flex items-center justify-center shrink-0 text-center whitespace-nowrap"
+            className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-full h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto border-border/40 truncate flex items-center justify-center shrink-0 text-center whitespace-nowrap"
           >
             <RotateCcw className="mr-1.5 size-3 shrink-0" /> Start Over
           </Button>
@@ -182,7 +182,7 @@ export function FeelingExpanderView({
               type="button"
               variant="outline"
               onClick={() => setIsEditing(true)}
-              className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-none h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto border-border/40 truncate flex items-center justify-center shrink-0 text-center whitespace-nowrap"
+              className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-full h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto border-border/40 truncate flex items-center justify-center shrink-0 text-center whitespace-nowrap"
             >
               <Edit3 className="mr-1.5 size-3 shrink-0" /> Edit
             </Button>
@@ -193,7 +193,7 @@ export function FeelingExpanderView({
           type="button"
           disabled={isEditing || isLoading || !!error}
           onClick={() => onApprove(expandedText)}
-          className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-none h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30 flex items-center justify-center shrink-0 text-center whitespace-nowrap"
+          className="font-mono text-[9px] sm:text-[10px] tracking-wider sm:tracking-widest uppercase rounded-full h-9 sm:h-10 px-4 sm:px-5 w-full sm:w-auto bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30 flex items-center justify-center shrink-0 text-center whitespace-nowrap"
         >
           <Check className="mr-1.5 size-3.5 stroke-[2.5px] shrink-0" /> Continue
         </Button>

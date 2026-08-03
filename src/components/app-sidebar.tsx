@@ -84,7 +84,7 @@ export function AppSidebar() {
         {!isMobile && (
           <button
             onClick={toggleSidebar}
-            className="p-1.5 hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all duration-300 border border-border/40 bg-transparent rounded-none ml-auto"
+            className="p-1.5 hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all duration-300 border border-border/40 bg-transparent rounded-full ml-auto"
             style={{
               transform: state === "collapsed" ? "rotate(180deg)" : "rotate(0deg)",
             }}
@@ -106,7 +106,7 @@ export function AppSidebar() {
                   isActive={isActive}
                   onClick={() => router.push(item.url)}
                   tooltip={item.title}
-                  className={`w-full hover:bg-foreground/5 font-mono text-[10px] tracking-[0.2em] uppercase rounded-none h-11 px-3 transition-colors ${
+                  className={`w-full hover:bg-foreground/5 font-mono text-[10px] tracking-[0.2em] uppercase rounded-xl h-11 px-3 transition-colors ${
                     isActive 
                       ? "bg-foreground/10 text-accent font-medium border-l border-accent" 
                       : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
@@ -130,7 +130,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               onClick={handleLogout}
               tooltip="Logout Session"
-              className="w-full font-mono text-[10px] tracking-[0.2em] uppercase rounded-none h-11 px-3 text-muted-foreground hover:text-destructive hover:bg-destructive/5 bg-transparent transition-colors"
+              className="w-full font-mono text-[10px] tracking-[0.2em] uppercase rounded-xl h-11 px-3 text-muted-foreground hover:text-destructive hover:bg-destructive/5 bg-transparent transition-colors"
             >
               <LogOut className="size-4 shrink-0" />
               {state === "expanded" && (

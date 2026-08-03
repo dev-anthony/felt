@@ -64,7 +64,7 @@ export function ProcessingView({ title, onComplete }: ProcessingViewProps) {
         </div>
 
         {/* Metrics Pipeline — Converted to flexible layout with wrapping support */}
-        <div className="border border-border/20 bg-background/40 p-4 space-y-3.5 text-left rounded-none min-w-0">
+        <div className="border border-border/20 bg-background/40 p-4 space-y-3.5 text-left rounded-2xl min-w-0">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[10px] font-mono min-w-0">
             <span className="text-muted-foreground flex items-center gap-1.5 shrink-0">
@@ -74,7 +74,7 @@ export function ProcessingView({ title, onComplete }: ProcessingViewProps) {
               {statusIndex > 0 ? (
                 <span className="text-foreground block truncate sm:max-w-[180px]">BPM, Key, Valence Bound</span>
               ) : (
-                <Skeleton className="h-3 w-24 bg-foreground/5 rounded-none max-w-full" />
+                <Skeleton className="h-3 w-24 bg-foreground/5 rounded-full max-w-full" />
               )}
             </div>
           </div>
@@ -87,7 +87,7 @@ export function ProcessingView({ title, onComplete }: ProcessingViewProps) {
               {statusIndex > 1 ? (
                 <span className="text-foreground block truncate sm:max-w-[180px]">Lyrics Parsed via Whisper</span>
               ) : (
-                <Skeleton className="h-3 w-24 bg-foreground/5 rounded-none max-w-full" />
+                <Skeleton className="h-3 w-24 bg-foreground/5 rounded-full max-w-full" />
               )}
             </div>
           </div>
@@ -100,7 +100,7 @@ export function ProcessingView({ title, onComplete }: ProcessingViewProps) {
               {statusIndex > 2 ? (
                 <span className="text-foreground block truncate sm:max-w-[180px]">Brief Compiled</span>
               ) : (
-                <Skeleton className="h-3 w-16 bg-foreground/5 rounded-none max-w-full" />
+                <Skeleton className="h-3 w-16 bg-foreground/5 rounded-full max-w-full" />
               )}
             </div>
           </div>

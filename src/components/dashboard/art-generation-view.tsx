@@ -10,9 +10,14 @@ interface ArtGenerationViewProps {
   uploadId: string
   lyricContext: string
   onComplete: (imageUrl: string) => void
+  /** Optional Task 4 reference-image workflow. See reference-image-picker.tsx. */
+  referenceImageB64?: string | null
+  creativeStrength?: number
 }
 
-export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGenerationViewProps) {
+export function ArtGenerationView({
+  uploadId, lyricContext, onComplete, referenceImageB64, creativeStrength,
+}: ArtGenerationViewProps) {
   const [status, setStatus] = React.useState<"idle" | "generating" | "success" | "error">("idle")
   const [generatedImageUrl, setGeneratedImageUrl] = React.useState<string | null>(null)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
@@ -30,6 +35,8 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
       const response = await generationApi.generate({
         upload_id: uploadId,
         lyric_context: lyricContext,
+        reference_image_b64: referenceImageB64 || undefined,
+        creative_strength: referenceImageB64 ? creativeStrength : undefined,
       })
 
       if (response && response.image_url) {
@@ -43,7 +50,7 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
       setErrorMessage(getErrorMessage(err, "Failed to finalize sync rendering pipeline."))
       setStatus("error")
     }
-  }, [uploadId, lyricContext])
+  }, [uploadId, lyricContext, referenceImageB64, creativeStrength])
 
   // Single invocation mount lifecycle check
   React.useEffect(() => {
@@ -60,7 +67,7 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
       {status === "generating" && (
         <div className="space-y-4 flex flex-col items-center">
           <div className="relative size-14 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-none border border-accent/30 animate-spin [animation-duration:3s]" />
+            <div className="absolute inset-0 rounded-full border border-accent/30 animate-spin [animation-duration:3s]" />
             <Sparkles className="size-6 text-accent animate-pulse" />
           </div>
           
@@ -77,7 +84,7 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
           </div>
 
           <div className="w-48 h-[2px] bg-foreground/5 relative overflow-hidden border border-border/10">
-            <div className="absolute top-0 bottom-0 left-0 bg-accent w-1/2 animate-pulse rounded-none" />
+            <div className="absolute top-0 bottom-0 left-0 bg-accent w-1/2 animate-pulse rounded-full" />
           </div>
         </div>
       )}
@@ -100,7 +107,7 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
               hasFired.current = true
               executeGeneration()
             }}
-            className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider bg-foreground text-background px-4 py-2 hover:bg-foreground/90 transition-all border border-transparent rounded-none"
+            className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider bg-foreground text-background px-4 py-2 hover:bg-foreground/90 transition-all border border-transparent rounded-full"
           >
             <RefreshCw className="size-3" />
             Restart Pipeline
@@ -120,7 +127,7 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
             </h4>
           </div>
 
-          <div className="relative aspect-square size-64 bg-neutral-900 border border-border/40 shadow-2xl overflow-hidden group rounded-none">
+          <div className="relative aspect-square size-64 bg-neutral-900 border border-border/40 shadow-2xl overflow-hidden group rounded-2xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src={generatedImageUrl} 
@@ -132,7 +139,7 @@ export function ArtGenerationView({ uploadId, lyricContext, onComplete }: ArtGen
 
           <button 
             onClick={() => onComplete(generatedImageUrl)}
-            className="font-mono text-[10px] uppercase tracking-[0.25em] bg-accent/10 text-accent border border-accent/20 px-6 py-2.5 hover:bg-accent/20 transition-all rounded-none"
+            className="font-mono text-[10px] uppercase tracking-[0.25em] bg-accent/10 text-accent border border-accent/20 px-6 py-2.5 hover:bg-accent/20 transition-all rounded-full"
           >
             Accept Manifestation
           </button>

@@ -87,7 +87,7 @@ export function StepGenre({ initialValue, onProceed, onBack }: StepGenreProps) {
           type="button"
           variant="ghost"
           onClick={onBack}
-          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4 text-muted-foreground hover:text-foreground"
+          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-4 text-muted-foreground hover:text-foreground"
         >
           ← Back
         </Button>
@@ -95,7 +95,7 @@ export function StepGenre({ initialValue, onProceed, onBack }: StepGenreProps) {
           type="button"
           disabled={!genre}
           onClick={() => onProceed({ genre })}
-          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
+          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
         >
           Lock Lane →
         </Button>

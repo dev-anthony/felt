@@ -100,7 +100,7 @@ export function StepSubject({ initialValue, onComplete, onBack, submitting }: St
           variant="ghost"
           disabled={submitting}
           onClick={onBack}
-          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4 text-muted-foreground hover:text-foreground"
+          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-4 text-muted-foreground hover:text-foreground"
         >
           ← Back
         </Button>
@@ -108,7 +108,7 @@ export function StepSubject({ initialValue, onComplete, onBack, submitting }: St
           type="button"
           disabled={!mode || submitting}
           onClick={() => onComplete({ subjectMode: mode })}
-          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
+          className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
         >
           {submitting ? "Saving…" : "Enter FELT →"}
         </Button>

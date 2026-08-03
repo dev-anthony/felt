@@ -28,7 +28,7 @@ export function StepCityInfluence({ initialValue, onProceed, onBack }: StepCityI
           value={city}
           onChange={(e) => setCity(e.target.value.toUpperCase())}
           maxLength={32}
-          className="rounded-none bg-background border-border/40 text-sm font-mono tracking-widest pl-10 h-11 focus-visible:border-accent"
+          className="rounded-xl bg-background border-border/40 text-sm font-mono tracking-widest pl-10 h-11 focus-visible:border-accent"
         />
         <Globe className="absolute left-3.5 top-3.5 size-4 text-muted-foreground/60 stroke-[1.5px]" />
       </div>
@@ -38,7 +38,7 @@ export function StepCityInfluence({ initialValue, onProceed, onBack }: StepCityI
           type="button"
           variant="ghost"
           onClick={onBack}
-          className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-4"
+          className="font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-4"
         >
           ← Back
         </Button>
@@ -46,7 +46,7 @@ export function StepCityInfluence({ initialValue, onProceed, onBack }: StepCityI
           type="button"
           disabled={city.trim().length < 2}
           onClick={() => onProceed({ city })}
-          className="font-mono text-[10px] uppercase tracking-widest rounded-none h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
+          className="font-mono text-[10px] uppercase tracking-widest rounded-full h-10 px-6 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-20 transition-all"
         >
           Lock Origin →
         </Button>

@@ -53,7 +53,12 @@ export function SubPageHeader() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-4 py-2 rounded-full hover:bg-foreground/10 hover:text-accent transition-colors"
+                aria-current={isActive ? "page" : undefined}
+                className={`px-4 py-2 rounded-full transition-colors ${
+                  isActive
+                    ? "bg-foreground/10 text-accent"
+                    : "hover:bg-foreground/10 hover:text-accent"
+                }`}
               >
                 {link.name}
               </Link>

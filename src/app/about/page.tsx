@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { AuthDialog } from "@/components/auth-dialog";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SubPageHeader } from "@/components/SubpageHeader";
+import { FloatingImageStack } from "@/components/marketing/floating-image-stack";
 
 const HERO_STACK_ITEMS = [
   { label: "Primal", imageUrl: "/download (10).jpg" },
@@ -31,45 +32,6 @@ function LiveClock() {
     <span className="font-mono text-[10px] tracking-widest text-muted-foreground">
       {time || "00:00:00 UTC"}
     </span>
-  );
-}
-
-// Animated Tilted Image Stack with continuous liquid floating movement
-export function FloatingImageStack({ items }: { items: typeof HERO_STACK_ITEMS }) {
-  return (
-    <div className="flex items-center justify-center -space-x-16 sm:-space-x-12 px-4 w-full pt-8 pb-4">
-      {items.map((item, i) => (
-        <div
-          key={item.label}
-          className="group relative aspect-square shrink-0 w-28 sm:w-36 lg:w-44 rounded-2xl overflow-hidden bg-card border-[4px] border-black shadow-2xl transition-all duration-700 ease-out rotate-29 hover:-translate-y-6 hover:rotate-12 hover:!z-50 animate-float"
-          style={{ 
-            animationDelay: `${i * 0.6}s`,
-            animationDuration: `${4 + i * 0.5}s`,
-            zIndex: items.length - i 
-          }}
-        >
-          {/* Glass specular sheen on card top */}
-          <div className="absolute inset-0 z-20 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
-
-          {/* Inner counter-rotation */}
-          <div className="absolute inset-0 w-full h-full -rotate-29 scale-[1.35]">
-            {item.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={item.imageUrl}
-                alt={item.label}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-            ) : (
-              <div
-                className="w-full h-full bg-gradient-to-br from-accent/40 via-muted to-secondary"
-                aria-label={item.label}
-              />
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -107,6 +69,16 @@ export default function AboutPage() {
             <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-foreground/40 to-transparent pointer-events-none" />
 
 
+
+            {/* Small operational status line — built earlier but never mounted
+                anywhere on the page. */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <span className="inline-flex size-1.5 rounded-full bg-accent animate-pulse-bar" />
+              <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
+                System online ·
+              </span>
+              <LiveClock />
+            </div>
 
             {/* Main Headline */}
             <h1 className="font-display italic font-medium text-4xl sm:text-6xl md:text-7xl leading-[1.08] text-foreground tracking-wide max-w-3xl mx-auto mb-6">

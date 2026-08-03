@@ -19,17 +19,19 @@ import * as React from "react"
  */
 export function useScrollReveal<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = React.useRef<T>(null)
-  const [visible, setVisible] = React.useState(false)
+  // Reduced-motion is read as a LAZY INITIAL state, not set from inside the
+  // effect below: setting it there was a synchronous setState-in-effect (React
+  // flags this because it forces an extra render on every mount), and it also
+  // meant a reduced-motion visitor saw one frame of the hidden pre-reveal state
+  // before the effect had a chance to run. Computing it up front avoids both.
+  const [visible, setVisible] = React.useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  )
 
   React.useEffect(() => {
+    if (visible) return // already revealed (reduced-motion, or a fast re-mount)
     const node = ref.current
     if (!node) return
-    // Respect a visitor's reduced-motion preference by revealing immediately
-    // rather than animating at all.
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setVisible(true)
-      return
-    }
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -41,7 +43,7 @@ export function useScrollReveal<T extends HTMLElement>(options?: IntersectionObs
     )
     observer.observe(node)
     return () => observer.disconnect()
-  }, [options])
+  }, [options, visible])
 
   return {
     ref,

@@ -126,10 +126,10 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen w-full px-4 sm:px-8 py-8 sm:py-12 max-w-2xl">
-        <Skeleton className="h-10 w-40 rounded-none" />
+        <Skeleton className="h-10 w-40 rounded-xl" />
         <div className="space-y-4 mt-10">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-none" />
+            <Skeleton key={i} className="h-12 w-full rounded-xl" />
           ))}
         </div>
       </div>
@@ -137,7 +137,7 @@ export default function ProfilePage() {
   }
 
   const inputClass =
-    "rounded-none border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-10"
+    "rounded-xl border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-10"
   const labelClass = "font-mono text-[9px] uppercase tracking-widest text-muted-foreground"
 
   return (
@@ -154,7 +154,7 @@ export default function ProfilePage() {
 
         {/* Avatar */}
         <div className="flex items-center gap-5 mt-8">
-          <div className="relative size-20 shrink-0 overflow-hidden border border-border/40 bg-neutral-900">
+          <div className="relative size-20 shrink-0 overflow-hidden rounded-full border border-border/40 bg-neutral-900">
             {avatarUrl ? (
               <Image src={avatarUrl} alt="Avatar" fill sizes="80px" className="object-cover" />
             ) : (
@@ -168,7 +168,7 @@ export default function ProfilePage() {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="shrink-0 whitespace-nowrap flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest border border-border/80 px-4 h-10 text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-40"
+              className="shrink-0 whitespace-nowrap flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest rounded-full border border-border/80 px-4 h-10 text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-40"
             >
               {uploading ? <Loader2 className="size-3 shrink-0 animate-spin" /> : <Upload className="size-3 shrink-0" />}
               {uploading ? "Uploading…" : "Change photo"}
@@ -209,7 +209,7 @@ export default function ProfilePage() {
               <button
                 onClick={addWord}
                 disabled={!wordDraft.trim() || soundWords.length >= SOUND_WORDS_REQUIRED}
-                className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest border border-border/80 px-4 h-10 text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-30"
+                className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest rounded-full border border-border/80 px-4 h-10 text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-30"
               >
                 Add
               </button>
@@ -219,7 +219,7 @@ export default function ProfilePage() {
                 {soundWords.map((w) => (
                   <span
                     key={w}
-                    className="inline-flex items-center gap-1.5 border border-border/60 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-foreground"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-foreground"
                   >
                     {w}
                     <button
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                   <button
                     key={opt.id}
                     onClick={() => setGenre(opt.id)}
-                    className={`shrink-0 whitespace-nowrap h-9 px-3 border font-mono text-[9px] uppercase tracking-widest transition-colors ${
+                    className={`shrink-0 whitespace-nowrap h-9 px-3 rounded-full border font-mono text-[9px] uppercase tracking-widest transition-colors ${
                       active
                         ? "border-accent bg-accent/10 text-accent"
                         : "border-border/40 text-muted-foreground hover:text-foreground hover:bg-foreground/5"
@@ -275,7 +275,7 @@ export default function ProfilePage() {
                   <button
                     key={opt.id}
                     onClick={() => setSubjectMode(opt.id)}
-                    className={`shrink-0 whitespace-nowrap h-9 px-3 border font-mono text-[9px] uppercase tracking-widest transition-colors ${
+                    className={`shrink-0 whitespace-nowrap h-9 px-3 rounded-full border font-mono text-[9px] uppercase tracking-widest transition-colors ${
                       active
                         ? "border-accent bg-accent/10 text-accent"
                         : "border-border/40 text-muted-foreground hover:text-foreground hover:bg-foreground/5"
@@ -294,7 +294,7 @@ export default function ProfilePage() {
           <button
             onClick={handleSave}
             disabled={saving || !dirty || !soundWordsValid}
-            className="shrink-0 whitespace-nowrap flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest bg-foreground text-background px-5 h-10 hover:bg-foreground/90 transition-colors disabled:opacity-40"
+            className="shrink-0 whitespace-nowrap flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest rounded-full bg-foreground text-background px-5 h-10 hover:bg-accent transition-colors disabled:opacity-40"
           >
             {saving ? <Loader2 className="size-3 shrink-0 animate-spin" /> : <Check className="size-3 shrink-0" />}
             {saving ? "Saving…" : "Save changes"}

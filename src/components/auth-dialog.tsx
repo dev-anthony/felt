@@ -82,9 +82,14 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* Responsive: never wider than the viewport on small phones, and scrolls
-          internally on short screens instead of overflowing off-screen. */}
-      <DialogContent className="rounded-none border border-border bg-popover w-[calc(100vw-2rem)] max-w-sm sm:max-w-md p-6 sm:p-8 gap-5 sm:gap-6 max-h-[calc(100dvh-2rem)] overflow-y-auto">
-        
+          internally on short screens instead of overflowing off-screen.
+          rounded-3xl matches the rounded-pill/rounded-2xl language introduced
+          on the redesigned marketing pages (Hero, Navigation, Pricing) — this
+          used to be rounded-none, the original sharp-cornered "editorial"
+          style, but that now reads as inconsistent next to the rest of the
+          site rather than as a deliberate contrast. */}
+      <DialogContent className="rounded-3xl border border-border bg-popover w-[calc(100vw-2rem)] max-w-sm sm:max-w-md p-6 sm:p-8 gap-5 sm:gap-6 max-h-[calc(100dvh-2rem)] overflow-y-auto scrollbar-custom">
+
         <DialogHeader className="space-y-1.5">
           <DialogTitle className="font-display italic text-3xl font-medium tracking-tight text-foreground">
             {view === "sign-in" && "Welcome back"}
@@ -98,11 +103,14 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {/* Error message */}
+        {/* Error message — a bordered banner rather than a bare line of red
+            text, so it reads as a distinct alert rather than stray copy. */}
         {error && (
-          <p className="font-mono text-[10px] text-red-400 tracking-wide -mt-2">
-            {error}
-          </p>
+          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 -mt-1">
+            <p className="font-mono text-[10px] text-destructive tracking-wide leading-relaxed">
+              {error}
+            </p>
+          </div>
         )}
 
         {view !== "email-verification" ? (
@@ -110,46 +118,49 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
             <form onSubmit={handleSubmit} className="space-y-4 font-sans">
               {view === "create-account" && (
                 <div className="space-y-1.5">
-                  <label className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Name</label>
-                  <Input 
-                    type="text" 
+                  <label htmlFor="auth-name" className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Name</label>
+                  <Input
+                    id="auth-name"
+                    type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Name" 
-                    className="rounded-none border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-10"
+                    placeholder="Name"
+                    className="rounded-xl border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-11"
                   />
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Email address</label>
-                <Input 
-                  type="email" 
+                <label htmlFor="auth-email" className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Email address</label>
+                <Input
+                  id="auth-email"
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@domain.com" 
-                  className="rounded-none border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-10"
+                  placeholder="name@domain.com"
+                  className="rounded-xl border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-11"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Password</label>
-                <Input 
-                  type="password" 
+                <label htmlFor="auth-password" className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">Password</label>
+                <Input
+                  id="auth-password"
+                  type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" 
-                  className="rounded-none border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-10"
+                  placeholder="••••••••"
+                  className="rounded-xl border-input bg-transparent text-sm focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/40 h-11"
                 />
               </div>
 
               <Button 
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-none h-10 bg-foreground text-background font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-accent hover:text-foreground transition-colors mt-2 disabled:opacity-50"
+                className="w-full rounded-full h-11 bg-foreground text-background font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-accent hover:text-foreground transition-colors mt-2 disabled:opacity-50"
               >
                 {loading ? "Please wait..." : view === "sign-in" ? "Sign In" : "Sign Up"}
               </Button>
@@ -183,17 +194,18 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           /* Email Verification State Block */
           <form onSubmit={handleSubmit} className="space-y-6 font-sans">
             <div className="space-y-2">
-              <label className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground block text-center">
+              <label htmlFor="auth-otp" className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground block text-center">
                 Enter Verification Passcode
               </label>
-              <Input 
-                type="text" 
+              <Input
+                id="auth-otp"
+                type="text"
                 required
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                placeholder="000000" 
-                className="rounded-none border-input bg-transparent text-center text-xl tracking-[0.5em] font-mono focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/20 h-12"
+                placeholder="000000"
+                className="rounded-xl border-input bg-transparent text-center text-xl tracking-[0.5em] font-mono focus-visible:ring-0 focus-visible:border-accent text-foreground placeholder:text-muted-foreground/20 h-12"
               />
             </div>
 
@@ -201,7 +213,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
               <Button 
                 type="submit" 
                 disabled={otp.length !== 6 || loading}
-                className="w-full rounded-none h-10 bg-foreground text-background font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40"
+                className="w-full rounded-full h-11 bg-foreground text-background font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-accent hover:text-foreground transition-colors disabled:opacity-40"
               >
                 {loading ? "Verifying..." : "Verify & Launch"}
               </Button>

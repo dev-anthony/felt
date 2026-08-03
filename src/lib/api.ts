@@ -16,11 +16,8 @@ export function scheduleTokenRefresh(expiresAtInSeconds: number) {
   const delayInSeconds = timeUntilExpiration - refreshBuffer
   const delayInMilliseconds = Math.max(delayInSeconds, 0) * 1000
 
-  // console.log(`[FELT Auth] Predictive background token refresh scheduled in ${Math.max(delayInSeconds, 0)}s`)
-
   refreshTimeoutId = setTimeout(async () => {
     try {
-      console.log("[FELT Auth] Triggering proactive background session renewal loop...")
       const data = await authApi.refresh()
       if (data && data.expires_at) {
         scheduleTokenRefresh(data.expires_at)
@@ -88,7 +85,6 @@ const request = async <T>(
       isRefreshingPromise = null 
 
       if (refreshSuccessful) {
-        // console.log(`[FELT Network] silents session recovery successful. Re-executing: ${path}`)
         res = await fetch(`${BASE_URL}${path}`, {
           ...options,
           credentials: 'include',
@@ -403,7 +399,14 @@ export const generationApi = {
       body: JSON.stringify(body),
     }),
 
-  refine: (body: { upload_id: string; lyric_context: string; image_url?: string | null }) =>
+  refine: (body: {
+    upload_id: string
+    lyric_context: string
+    image_url?: string | null
+    /** Task 4 reference-image workflow — see reference-image-picker.tsx. */
+    reference_image_b64?: string
+    creative_strength?: number
+  }) =>
     request<{ generation_id: string; image_url: string; technique: Technique }>('/api/generations/refine', {
       method: 'PATCH',
       body: JSON.stringify(body),
@@ -415,6 +418,9 @@ export const generationApi = {
     upload_id: string
     lyric_context?: string
     technique?: Technique
+    /** Task 4 reference-image workflow — see reference-image-picker.tsx. */
+    reference_image_b64?: string
+    creative_strength?: number
   }) =>
     request<{
       generation_id: string

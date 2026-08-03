@@ -24,9 +24,9 @@ const jetbrainsMono = JetBrains_Mono({
 import { AuthProviderWrapper } from "@/components/providers/app-provider-wrapper";
 
 export const metadata: Metadata = {
-  title: "FELT — Your Music Made Visible | AI Album Cover Art Generator",
+  title: "FELT, Your Music Made Visible | Cover Art Generator",
   description: "FELT analyzes the emotional DNA of your audio tracks and translates acoustic characteristics into photorealistic, high-resolution custom cover art.",
-  keywords: ["AI cover art", "music technology", "album art generator", "music production tools", "visualize audio", "Nigeria music tech"],
+  keywords: ["Cover art", "Cover art generator", "Cover art generation", "AI cover art", "music technology", "album art generator", "album art generation", "music production tools", "visualize audio", "Nigeria music tech", "Music tech and arts"],
   authors: [{ name: "Music Tech & Arts" }],
   metadataBase: new URL("https://www.usefelt.online"),
 
@@ -77,11 +77,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}>
-      <head>
-        <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.js" defer />
-        <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js" defer />
-        <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-models.js" defer />
-      </head>
       {/*
         suppressHydrationWarning is scoped to <body>'s OWN attributes, one level
         deep — it does not silence mismatches in any child, so real hydration
