@@ -455,13 +455,25 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
     // The afrobeat branch previously required `finalValence > 55`, which was
     // unreachable for minor-key tracks under the old mode-only valence — so
     // Afrobeats records always fell through to the "hip-hop" default.
-    let finalGenre = "hip-hop"
+    // The fallback itself was "hip-hop" — a specific, stereotype-loaded genre,
+    // not a neutral "unknown". A real Afro-fusion instrumental (90 BPM,
+    // danceability 53, acousticness 81) missed every branch below by a small
+    // margin (afrobeat needed >60 danceability and >=95 BPM) and silently
+    // became "hip-hop" in the prompt Gemini reads, dragging the whole cover
+    // toward hip-hop-coded imagery for a track that was never hip-hop. Widened
+    // the afrobeat band to match real-world mid-tempo, moderate-danceability
+    // instrumentals, and changed the true fallback to a neutral label instead
+    // of guessing a specific genre this heuristic has no signal for.
+    let finalGenre = "contemporary"
     if (currentVector.speechiness && currentVector.speechiness > 0.35 && finalBpm >= 120) finalGenre = "trap / drill"
     else if (currentVector.speechiness && currentVector.speechiness > 0.25 && finalBpm < 115) finalGenre = "boom bap / retro rap"
     else if (currentVector.brightness && currentVector.brightness > 0.65 && finalEnergy > 70) finalGenre = "electronic / dance"
     else if (finalAcousticness > 65 && finalEnergy < 45) finalGenre = "acoustic / neo-soul"
-    // Afrobeats/amapiano signature: mid-tempo, groove-forward, not speech-heavy.
-    else if (finalDanceability > 60 && finalBpm >= 95 && finalBpm <= 130 && finalSpeechiness < 35) finalGenre = "pop / afrobeat"
+    // Afrobeats/amapiano/afro-fusion signature: mid-tempo, groove-forward, not
+    // speech-heavy. Danceability and BPM floors lowered — the previous
+    // thresholds (>60 danceability, >=95 BPM) excluded slower or less
+    // dance-forward Afro-fusion instrumentals that are still clearly this genre.
+    else if (finalDanceability > 45 && finalBpm >= 85 && finalBpm <= 130 && finalSpeechiness < 35) finalGenre = "pop / afrobeat"
 
     // Research Module 3 DSP pass — runs on the same Essentia instance, before
     // teardown. Additive: every field is nullable and nothing above depends on
