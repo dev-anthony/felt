@@ -582,12 +582,12 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
         />
       </div>
 
-      <form onSubmit={handleProceed} className="p-6 sm:p-8 flex-1 flex flex-col justify-center min-w-0 w-full overflow-x-hidden">
+      <form onSubmit={handleProceed} className="p-6 sm:p-8 lg:p-10 flex-1 flex flex-col justify-center min-w-0 w-full overflow-x-hidden">
         {currentStep === "UPLOAD" && (
           <div className="space-y-6 w-full min-w-0">
             {/* Track type — two selectable cards, not a thin segmented toggle,
                 so the choice reads as a real decision. */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {(
                 [
                   { value: "vocal" as const, Icon: Music, label: "Vocals / Song", hint: "Has lyrics or vocals" },
@@ -665,34 +665,41 @@ export function WorkspaceWizard({ onClose, onCompleteGeneration, editTrack }: Wo
 
             <div className="h-px bg-border/15 w-full" />
 
-            {/* Brief */}
+            {/* Brief — Title/Artist pair up on wider screens so the modal's
+                extra width actually shortens the form instead of just
+                stretching single-column fields into empty space. */}
             <div className="space-y-5 min-w-0">
-              <div className="space-y-1.5">
-                <label htmlFor="wizard-track-title" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Track Title</label>
-                <Input
-                  id="wizard-track-title"
-                  placeholder="Title..."
-                  value={title}
-                  disabled={isUploading}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  className="rounded-2xl bg-background border-border/40 text-sm h-11"
-                />
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 min-w-0">
+                <div className="space-y-1.5 min-w-0">
+                  <label htmlFor="wizard-track-title" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Track Title</label>
+                  <Input
+                    id="wizard-track-title"
+                    placeholder="Title..."
+                    value={title}
+                    disabled={isUploading}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    className="rounded-2xl bg-background border-border/40 text-sm h-11"
+                  />
+                </div>
 
-              <div className="space-y-1.5">
-                <label htmlFor="wizard-artist-name" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Artist Name <span className="normal-case text-muted-foreground/50">(optional — helps us find lyrics for covers/released songs)</span>
-                </label>
-                <Input
-                  id="wizard-artist-name"
-                  placeholder="e.g. The Weeknd"
-                  value={artistName}
-                  disabled={isUploading}
-                  onChange={(e) => setArtistName(e.target.value)}
-                  className="rounded-2xl bg-background border-border/40 text-sm h-11"
-                />
+                <div className="space-y-1.5 min-w-0">
+                  <label htmlFor="wizard-artist-name" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground truncate block">
+                    Artist Name <span className="normal-case text-muted-foreground/50">(optional)</span>
+                  </label>
+                  <Input
+                    id="wizard-artist-name"
+                    placeholder="e.g. The Weeknd"
+                    value={artistName}
+                    disabled={isUploading}
+                    onChange={(e) => setArtistName(e.target.value)}
+                    className="rounded-2xl bg-background border-border/40 text-sm h-11"
+                  />
+                </div>
               </div>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50 -mt-3">
+                Artist name helps us find lyrics for covers/released songs
+              </p>
 
               <div className="space-y-1.5">
                 <label htmlFor="wizard-prompt" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">What is this song about in one sentence?</label>
