@@ -147,21 +147,25 @@
 /* Slim, low-contrast scrollbar for internal panels (dialogs, expanders) where
    the browser default reads as a jarring grey slab against the dark theme. */
 @utility scrollbar-custom {
+  /* Thin and white, per design brief — pure white (not the warm-tinted
+     foreground) at low opacity so it reads as a rail, not a UI element
+     competing with content, but is still unmistakably white on the dark
+     surfaces this runs on. */
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
+  scrollbar-color: oklch(1 0 0 / 25%) transparent;
 
   &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: oklch(0.95 0.012 90 / 15%);
+    background-color: oklch(1 0 0 / 25%);
     border-radius: 999px;
   }
   &::-webkit-scrollbar-thumb:hover {
-    background-color: oklch(0.95 0.012 90 / 28%);
+    background-color: oklch(1 0 0 / 45%);
   }
 }
